@@ -62,6 +62,11 @@ export class CohortMemberHandler {
 
       const updates: Record<string, string | null | undefined> = {};
 
+      // Include status if provided
+      if (status) {
+        updates['MemberStatus'] = status;
+      }
+
       // Path A: Support a direct fields map: { fields: { Subject: 'x', Fees: 'y', ... } }
       if (
         data?.fields &&
@@ -82,7 +87,8 @@ export class CohortMemberHandler {
       for (const field of customFields) {
         const label: string = (field?.label || '').toString();
         const key = label.trim().toLowerCase();
-        const value = this.extractFieldValue(field);
+        // Store the value as-is without any transformation
+        const value = field?.value;
 
         // Match only by label (case-insensitive)
         if (!wanted.has(key)) continue;
@@ -92,7 +98,7 @@ export class CohortMemberHandler {
 
       if (Object.keys(updates).length === 0) {
         this.logger.debug(
-          `No target custom fields found | cohortMembershipId=${cohortMembershipId} | customFieldsLen=${customFields.length} | fieldsKeys=${
+          `No updates to perform | cohortMembershipId=${cohortMembershipId} | status=${status || 'none'} | customFieldsLen=${customFields.length} | fieldsKeys=${
             data?.fields ? Object.keys(data.fields).join(',') : 'none'
           }`,
         );
@@ -117,30 +123,5 @@ export class CohortMemberHandler {
       );
       throw error;
     }
-  }
-
-  private extractFieldValue(field: any): string | null {
-    // Prefer selectedValues array
-    const selected = field?.selectedValues;
-    if (Array.isArray(selected) && selected.length > 0) {
-      const toString = (v: any) =>
-        v?.value ??
-        v?.label ??
-        v?.name ??
-        v?.id ??
-        (typeof v === 'string' ? v : null);
-      const values = selected.map(toString).filter((v: any) => v != null);
-      if (values.length > 0) {
-        return values.join(',');
-      }
-    }
-    // Fallback to value if present
-    if (field?.value != null) {
-      if (Array.isArray(field.value)) {
-        return field.value.map((v: any) => v?.value ?? v).join(',');
-      }
-      return field.value.toString();
-    }
-    return null;
   }
 }
