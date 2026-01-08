@@ -118,7 +118,6 @@ export class UserHandler {
 
   async handleUserTenantStatusUpdate(data: any) {
     try {
-      console.log('handleUserTenantStatusUpdate data', data);
       // Validate required fields
       validateString(data.userId, 'userId');
       validateString(data.tenantId, 'tenantId');
@@ -177,7 +176,6 @@ export class UserHandler {
 
   async handleUserTenantMapping(data: any) {
     try {
-      console.log(data,"Shubham");
       // Validate required fields
       validateString(data.userId, 'userId');
       validateString(data.tenantId, 'tenantId');
@@ -197,7 +195,6 @@ export class UserHandler {
         await this.dbService.saveUserProfileData(transformedUserData);
         console.log(`[UserHandler] User profile updated with custom fields for userId=${data.userId}`);
       } else if (data.user) {
-        console.log(data.user.firstName,data.user.lastName,"")
         // Fallback to basic user update if no custom fields
         const userUpdateData = {
           userId: data.userId,
@@ -207,7 +204,6 @@ export class UserHandler {
           mobile: data.user.mobile?.toString(),
           updatedAt: data.updatedAt ? new Date(data.updatedAt) : new Date(),
         };
-        console.log(userUpdateData)
         await this.dbService.saveUserProfileData(userUpdateData);
         console.log(`[UserHandler] User profile updated for userId=${data.userId}`);
       }
