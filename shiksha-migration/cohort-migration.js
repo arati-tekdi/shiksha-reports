@@ -1,7 +1,58 @@
 const { Client } = require('pg');
+const fs = require('fs');
+const path = require('path');
 const dbConfig = require('./db');
 
-console.log('=== Loading cohort-migration.js ===');
+// Setup file logging
+const logDir = path.join(__dirname, 'logs');
+if (!fs.existsSync(logDir)) {
+  fs.mkdirSync(logDir, { recursive: true });
+}
+
+const logFileName = `cohort-migration-${new Date().toISOString().replace(/[:.]/g, '-')}.log`;
+const logFilePath = path.join(logDir, logFileName);
+const logStream = fs.createWriteStream(logFilePath, { flags: 'a' });
+
+// Logger utility that writes to both console and file
+const logger = {
+  log: (message) => {
+    const timestamp = new Date().toISOString();
+    const logMessage = `[${timestamp}] ${message}`;
+    console.log(message);
+    logStream.write(logMessage + '\n');
+  },
+  error: (message) => {
+    const timestamp = new Date().toISOString();
+    const logMessage = `[${timestamp}] ERROR: ${message}`;
+    console.error(message);
+    logStream.write(logMessage + '\n');
+  },
+  warn: (message) => {
+    const timestamp = new Date().toISOString();
+    const logMessage = `[${timestamp}] WARN: ${message}`;
+    console.warn(message);
+    logStream.write(logMessage + '\n');
+  },
+  close: () => {
+    logStream.end();
+  }
+};
+
+// Handle process exit to close log stream
+process.on('exit', () => {
+  logger.close();
+});
+process.on('SIGINT', () => {
+  logger.close();
+  process.exit();
+});
+process.on('SIGTERM', () => {
+  logger.close();
+  process.exit();
+});
+
+logger.log('=== Loading cohort-migration.js ===');
+logger.log(`Log file: ${logFilePath}`);
 
 /*
  * TYPE TRANSFORMATION LOGIC:
@@ -23,16 +74,33 @@ console.log('=== Loading cohort-migration.js ===');
 const COHORT_FIELD_ID_TO_COLUMN = {
   // From your mapping list
   '000a7469-2721-4c7b-8180-52812a0f6fe7': 'Type',            // center_type => Type
-  '6469c3ac-8c46-49d7-852a-00f9589737c5': 'CoStateID',       // state => CoStateID
-  'b61edfc6-3787-4079-86d3-37262bf23a9e': 'CoDistrictID',    // district => CoDistrictID
-  '4aab68ae-8382-43aa-a45a-e9b239319857': 'CoBlockID',       // block => CoBlockID
-  '8e9bb321-ff99-4e2e-9269-61e863dd0c54': 'CoVillageID',     // village => CoVillageID
+ // '6469c3ac-8c46-49d7-852a-00f9589737c5': 'CoStateID',       // state => CoStateID
+ // 'b61edfc6-3787-4079-86d3-37262bf23a9e': 'CoDistrictID',    // district => CoDistrictID
+ // '4aab68ae-8382-43aa-a45a-e9b239319857': 'CoBlockID',       // block => CoBlockID
+ // '8e9bb321-ff99-4e2e-9269-61e863dd0c54': 'CoVillageID',     // village => CoVillageID
   'f93c0ac3-f827-4794-9457-441fa1057b42': 'CoBoard',         // board => CoBoard
   '69a9dba2-e05e-40cd-a39c-047b9b676b5c': 'CoSubject',       // subject => CoSubject
   '5a2dbb89-bbe6-4aa8-b541-93e01ab07b70': 'CoGrade',         // grade => CoGrade
   '7b214a17-5a07-4ee0-bedc-271429862d30': 'CoMedium',        // medium => CoMedium
   'e5277d7b-e7ef-4a11-9a54-a8e6e7975383': 'CoIndustry',      // industry => CoIndustry
   'e9f8acbb-b10d-4b46-9584-f5ec453c250e': 'CoGoogleMapLink', // google_map_link => CoGoogleMapLink
+
+
+  //shiksha custom fields
+  '5fce49b6-cd23-44f5-b87b-4ae0cbe2e328': 'CoProgram',
+  'c3357b23-1394-48a9-afc5-7589873365ae': 'CoCluster',
+  'fe466e4e-193b-4d01-863d-cf861d8d5bf5': 'CoLongitude',
+  'fd466e4e-193b-4d01-863d-cf861d8d5bf4': 'CoLatitude',
+  'c4ad6f2a-f4b3-4f66-b1be-fcbe8ff607e3': 'CoSchoolType',
+  // Multiple field IDs mapping to same location columns
+  'd4ad6f2a-f4b3-4f66-b1be-fcbe8ff607f3': 'CoDistrictID', // district
+  '62340eaa-40fb-48b9-ba90-dcaa78be778e': 'CoDistrictID', // district (duplicate)
+  'b4ad6f2a-f4b3-4f66-b1be-fcbe8ff607e3': 'CoStateID', // state
+  '800265b1-9058-482a-94f4-726197e1dfe4': 'CoStateID', // state (duplicate)
+  'e4bc6f2a-f4b3-4f66-b1be-fcbe8ff607f3': 'CoBlockID', // block1
+  '1e3e76e2-7f77-4fd7-a79f-abe5c33d4d08': 'CoBlockID', // block (duplicate)
+  'e4de6f2a-f4b3-4f66-b1be-fcbe8ff607d3': 'CoVillageID', // village1
+  '2f7e6930-0bc2-4e69-8bd4-dde205fa5471': 'CoVillageID', // village (duplicate)
 };
 
 // Temporary code->UUID mappings for the test cohort (replace with table lookups later)
@@ -107,7 +175,7 @@ function coerceValueForColumn(rawValue, columnName, fieldId) {
     const digits = getDigits(v);
     const num = digits ? parseInt(digits, 10) : null;
     if (num == null || Number.isNaN(num)) {
-      console.log(`[COHORT MIGRATION][DEBUG] Could not resolve numeric code for ${columnName} from value:`, v);
+      logger.log(`[COHORT MIGRATION][DEBUG] Could not resolve numeric code for ${columnName} from value: ${JSON.stringify(v)}`);
       return null;
     }
     return num;
@@ -133,10 +201,10 @@ function transformCohortType(originalType, hasParent, parentType = null) {
     // Parent cohort (Center) transformation
     switch (type) {
       case 'regular':
-        console.log(`[COHORT MIGRATION] Transforming center type: ${originalType} -> regularCenter`);
+        logger.log(`[COHORT MIGRATION] Transforming center type: ${originalType} -> regularCenter`);
         return 'regularCenter';
       case 'remote':
-        console.log(`[COHORT MIGRATION] Transforming center type: ${originalType} -> remoteCenter`);
+        logger.log(`[COHORT MIGRATION] Transforming center type: ${originalType} -> remoteCenter`);
         return 'remoteCenter';
       default:
         return originalType; // Keep original if not regular/remote
@@ -147,17 +215,17 @@ function transformCohortType(originalType, hasParent, parentType = null) {
       const normalizedParentType = parentType.toLowerCase().trim();
       switch (normalizedParentType) {
         case 'regular':
-          console.log(`[COHORT MIGRATION] Child cohort becomes regularBatch based on parent type: ${normalizedParentType}`);
+          logger.log(`[COHORT MIGRATION] Child cohort becomes regularBatch based on parent type: ${normalizedParentType}`);
           return 'regularBatch';
         case 'remote':
-          console.log(`[COHORT MIGRATION] Child cohort becomes remoteBatch based on parent type: ${normalizedParentType}`);
+          logger.log(`[COHORT MIGRATION] Child cohort becomes remoteBatch based on parent type: ${normalizedParentType}`);
           return 'remoteBatch';
         default:
-          console.log(`[COHORT MIGRATION] Parent type '${parentType}' not recognized, keeping original child type: ${originalType}`);
+          logger.log(`[COHORT MIGRATION] Parent type '${parentType}' not recognized, keeping original child type: ${originalType}`);
           return originalType; // Keep original if parent type is not recognized
       }
     } else {
-      console.log(`[COHORT MIGRATION] No parent type found for child cohort, keeping original type: ${originalType}`);
+      logger.log(`[COHORT MIGRATION] No parent type found for child cohort, keeping original type: ${originalType}`);
       return originalType; // Keep original if no parent type available
     }
   }
@@ -171,23 +239,23 @@ function transformCohortType(originalType, hasParent, parentType = null) {
  */
 async function lookupParentCohortTypeFromSource(sourceClient, parentId) {
   if (!parentId) {
-    console.log(`[COHORT MIGRATION] No parentId provided for lookup`);
+    logger.log(`[COHORT MIGRATION] No parentId provided for lookup`);
     return null;
   }
   
   try {
-    console.log(`[COHORT MIGRATION] Looking up parent cohort type for parentId: ${parentId}`);
+    logger.log(`[COHORT MIGRATION] Looking up parent cohort type for parentId: ${parentId}`);
     
     // First verify the parent cohort exists in source
     const cohortQuery = `SELECT "cohortId" FROM public."Cohort" WHERE "cohortId" = $1`;
     const cohortResult = await sourceClient.query(cohortQuery, [parentId]);
     
     if (!cohortResult.rows || cohortResult.rows.length === 0) {
-      console.log(`[COHORT MIGRATION] Parent cohort ${parentId} not found in source Cohort table`);
+      logger.log(`[COHORT MIGRATION] Parent cohort ${parentId} not found in source Cohort table`);
       return null;
     }
     
-    console.log(`[COHORT MIGRATION] Parent cohort ${parentId} found in source, looking up FieldValues...`);
+    logger.log(`[COHORT MIGRATION] Parent cohort ${parentId} found in source, looking up FieldValues...`);
 
     // Look up parent's Type from FieldValues table using the Type fieldId
     const typeFieldId = '000a7469-2721-4c7b-8180-52812a0f6fe7';
@@ -201,33 +269,34 @@ async function lookupParentCohortTypeFromSource(sourceClient, parentId) {
     
     if (result.rows && result.rows.length > 0) {
       const rawValue = result.rows[0].value;
-      console.log(`[COHORT MIGRATION] Raw parent type value from FieldValues:`, rawValue, `(type: ${typeof rawValue})`);
+      logger.log(`[COHORT MIGRATION] Raw parent type value from FieldValues: ${JSON.stringify(rawValue)} (type: ${typeof rawValue})`);
       
       // Handle text[] array - extract first value
       const parentType = firstOrSelf(rawValue);
-      console.log(`[COHORT MIGRATION] Extracted parent type: ${parentType}`);
+      logger.log(`[COHORT MIGRATION] Extracted parent type: ${parentType}`);
       
       return parentType ? parentType.toString().trim() : null;
     }
     
-    console.log(`[COHORT MIGRATION] No Type field value found in FieldValues for parent cohort ${parentId} with fieldId ${typeFieldId}`);
+    logger.log(`[COHORT MIGRATION] No Type field value found in FieldValues for parent cohort ${parentId} with fieldId ${typeFieldId}`);
     return null;
   } catch (error) {
-    console.error(`[COHORT MIGRATION] Error looking up parent cohort type from source for ${parentId}:`, error);
+    logger.error(`[COHORT MIGRATION] Error looking up parent cohort type from source for ${parentId}: ${error.message}`);
+    logger.error(error.stack);
     return null;
   }
 }
 
 async function migrateCohorts() {
-  console.log('=== STARTING COHORT MIGRATION ===');
+  logger.log('=== STARTING COHORT MIGRATION ===');
   const sourceClient = new Client(dbConfig.source);
   const destClient = new Client(dbConfig.destination);
 
   try {
     await sourceClient.connect();
-    console.log('[COHORT MIGRATION] Connected to source database');
+    logger.log('[COHORT MIGRATION] Connected to source database');
     await destClient.connect();
-    console.log('[COHORT MIGRATION] Connected to destination database');
+    logger.log('[COHORT MIGRATION] Connected to destination database');
 
     // Fetch core cohort rows from source
     const srcQuery = `
@@ -235,22 +304,25 @@ async function migrateCohorts() {
       FROM public."Cohort" c
     `;
     const result = await sourceClient.query(srcQuery);
-    console.log(`[COHORT MIGRATION] Found ${result.rows.length} cohorts to migrate.`);
+    logger.log(`[COHORT MIGRATION] Found ${result.rows.length} cohorts to migrate.`);
 
     for (const cohort of result.rows) {
       await upsertCoreCohort(destClient, cohort);
       await upsertCohortFieldValues(sourceClient, destClient, cohort.cohortId);
-    //   console.log('[COHORT MIGRATION] 🛑 Stopping after one cohort for testing');
+    //   logger.log('[COHORT MIGRATION] 🛑 Stopping after one cohort for testing');
     //   break;
     }
 
-    console.log('[COHORT MIGRATION] All cohorts processed.');
+    logger.log('[COHORT MIGRATION] All cohorts processed.');
   } catch (err) {
-    console.error('[COHORT MIGRATION] Critical error:', err);
+    logger.error('[COHORT MIGRATION] Critical error: ' + err.message);
+    logger.error(err.stack);
   } finally {
     await sourceClient.end();
     await destClient.end();
-    console.log('[COHORT MIGRATION] Disconnected from databases');
+    logger.log('[COHORT MIGRATION] Disconnected from databases');
+    logger.log('=== COMPLETED COHORT MIGRATION ===');
+    logger.close();
   }
 }
 
@@ -282,11 +354,11 @@ async function upsertCoreCohort(destClient, cohort) {
   ];
 
   await destClient.query(insert, values);
-  console.log(`[COHORT MIGRATION] Core upsert done for CohortID=${cohort.cohortId}`);
+  logger.log(`[COHORT MIGRATION] Core upsert done for CohortID=${cohort.cohortId}`);
 }
 
 async function upsertCohortFieldValues(sourceClient, destClient, cohortId) {
-  console.log(`[COHORT MIGRATION] Starting field values migration for cohort: ${cohortId}`);
+  logger.log(`[COHORT MIGRATION] Starting field values migration for cohort: ${cohortId}`);
   
   // Get cohort parent information from SOURCE database first
   const cohortQuery = `SELECT "parentId" FROM public."Cohort" WHERE "cohortId" = $1`;
@@ -294,13 +366,13 @@ async function upsertCohortFieldValues(sourceClient, destClient, cohortId) {
   const parentId = cohortRes.rows.length > 0 ? cohortRes.rows[0].parentId : null;
   const hasParent = !!parentId;
 
-  console.log(`[COHORT MIGRATION] Cohort ${cohortId} hasParent: ${hasParent}, parentId: ${parentId}`);
+  logger.log(`[COHORT MIGRATION] Cohort ${cohortId} hasParent: ${hasParent}, parentId: ${parentId}`);
 
   // Look up parent type from SOURCE database if this is a child cohort
   let parentType = null;
   if (hasParent) {
     parentType = await lookupParentCohortTypeFromSource(sourceClient, parentId);
-    console.log(`[COHORT MIGRATION] Child cohort ${cohortId} has parent ${parentId} with type: ${parentType}`);
+    logger.log(`[COHORT MIGRATION] Child cohort ${cohortId} has parent ${parentId} with type: ${parentType}`);
   }
 
   // Fetch FieldValues for this cohort
@@ -310,7 +382,7 @@ async function upsertCohortFieldValues(sourceClient, destClient, cohortId) {
     WHERE fv."itemId" = $1
   `;
   const fvRes = await sourceClient.query(fvQuery, [cohortId]);
-  console.log(`[COHORT MIGRATION] Found ${fvRes.rows.length} field values for cohort ${cohortId}`);
+  logger.log(`[COHORT MIGRATION] Found ${fvRes.rows.length} field values for cohort ${cohortId}`);
   
   const updates = {};
   let hasTypeField = false;
@@ -327,11 +399,11 @@ async function upsertCohortFieldValues(sourceClient, destClient, cohortId) {
       hasTypeField = true;
       const originalValue = coerced;
       coerced = transformCohortType(coerced, hasParent, parentType);
-      console.log(`[COHORT MIGRATION] Type transformation for cohort ${cohortId}: ${originalValue} -> ${coerced} (hasParent: ${hasParent}, parentType: ${parentType})`);
+      logger.log(`[COHORT MIGRATION] Type transformation for cohort ${cohortId}: ${originalValue} -> ${coerced} (hasParent: ${hasParent}, parentType: ${parentType})`);
     }
     
     updates[columnName] = coerced;
-    console.log(`[COHORT MIGRATION][DEBUG] fieldId=${fieldId} -> ${columnName} = ${coerced}`);
+    logger.log(`[COHORT MIGRATION][DEBUG] fieldId=${fieldId} -> ${columnName} = ${JSON.stringify(coerced)}`);
   }
 
   // For child cohorts (batches), if no Type field was found but we have parent type, still apply transformation
@@ -339,12 +411,12 @@ async function upsertCohortFieldValues(sourceClient, destClient, cohortId) {
     const batchType = transformCohortType('', hasParent, parentType);
     if (batchType && batchType !== '') {
       updates['Type'] = batchType;
-      console.log(`[COHORT MIGRATION] No Type field found for child cohort ${cohortId}, but applying batch type based on parent: ${batchType}`);
+      logger.log(`[COHORT MIGRATION] No Type field found for child cohort ${cohortId}, but applying batch type based on parent: ${batchType}`);
     }
   }
 
   if (Object.keys(updates).length === 0) {
-    console.log(`[COHORT MIGRATION] No updates to apply for cohort ${cohortId}`);
+    logger.log(`[COHORT MIGRATION] No updates to apply for cohort ${cohortId}`);
     return;
   }
 
@@ -365,13 +437,15 @@ async function upsertCohortFieldValues(sourceClient, destClient, cohortId) {
   `;
 
   await destClient.query(updateSql, params);
-  console.log(`[COHORT MIGRATION] Field values updated for CohortID=${cohortId} with updates:`, Object.keys(updates));
+  logger.log(`[COHORT MIGRATION] Field values updated for CohortID=${cohortId} with updates: ${JSON.stringify(Object.keys(updates))}`);
 }
 
 if (require.main === module) {
-  console.log('Running cohort-migration.js directly');
+  logger.log('Running cohort-migration.js directly');
   migrateCohorts().catch(err => {
-    console.error('Cohort migration failed with unhandled error:', err);
+    logger.error('Cohort migration failed with unhandled error: ' + err.message);
+    logger.error(err.stack);
+    logger.close();
     process.exit(1);
   });
 }

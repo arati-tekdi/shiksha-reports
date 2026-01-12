@@ -1,7 +1,58 @@
 const { Client } = require('pg');
+const fs = require('fs');
+const path = require('path');
 const dbConfig = require('./db');
 
-console.log('=== Loading user-migration.js ===');
+// Setup file logging
+const logDir = path.join(__dirname, 'logs');
+if (!fs.existsSync(logDir)) {
+  fs.mkdirSync(logDir, { recursive: true });
+}
+
+const logFileName = `user-migration-${new Date().toISOString().replace(/[:.]/g, '-')}.log`;
+const logFilePath = path.join(logDir, logFileName);
+const logStream = fs.createWriteStream(logFilePath, { flags: 'a' });
+
+// Logger utility that writes to both console and file
+const logger = {
+  log: (message) => {
+    const timestamp = new Date().toISOString();
+    const logMessage = `[${timestamp}] ${message}`;
+    console.log(message);
+    logStream.write(logMessage + '\n');
+  },
+  error: (message) => {
+    const timestamp = new Date().toISOString();
+    const logMessage = `[${timestamp}] ERROR: ${message}`;
+    console.error(message);
+    logStream.write(logMessage + '\n');
+  },
+  warn: (message) => {
+    const timestamp = new Date().toISOString();
+    const logMessage = `[${timestamp}] WARN: ${message}`;
+    console.warn(message);
+    logStream.write(logMessage + '\n');
+  },
+  close: () => {
+    logStream.end();
+  }
+};
+
+// Handle process exit to close log stream
+process.on('exit', () => {
+  logger.close();
+});
+process.on('SIGINT', () => {
+  logger.close();
+  process.exit();
+});
+process.on('SIGTERM', () => {
+  logger.close();
+  process.exit();
+});
+
+logger.log('=== Loading user-migration.js ===');
+logger.log(`Log file: ${logFilePath}`);
 
 /**
  * Mapping of fieldId (UUIDs) to column names in the centralised_report.users table
@@ -9,16 +60,16 @@ console.log('=== Loading user-migration.js ===');
  */
 const FIELD_ID_TO_COLUMN_MAPPING = {
   // Location hierarchy fields (based on CohortSummaryReport.js)
-  '6469c3ac-8c46-49d7-852a-00f9589737c5': 'UserStateID',        // State (value: '27')
-  'b61edfc6-3787-4079-86d3-37262bf23a9e': 'UserDistrictID',     // District (value: '515') 
-  '4aab68ae-8382-43aa-a45a-e9b239319857': 'UserBlockID',        // Block (value: '7081')
-  '8e9bb321-ff99-4e2e-9269-61e863dd0c54': 'UserVillageID',      // Village (value: '648170')
+  //'6469c3ac-8c46-49d7-852a-00f9589737c5': 'UserStateID',        // State (value: '27')
+  //'b61edfc6-3787-4079-86d3-37262bf23a9e': 'UserDistrictID',     // District (value: '515') 
+  //'4aab68ae-8382-43aa-a45a-e9b239319857': 'UserBlockID',        // Block (value: '7081')
+  //'8e9bb321-ff99-4e2e-9269-61e863dd0c54': 'UserVillageID',      // Village (value: '648170')
   
   // User profile fields (matching exact column names from destination table DDL)
 	'7b43db0a-f4c3-4c77-919f-622509ca7add':'UserPreferredModeOfLearning', 
-	'60f48fbf-d5e9-4a85-aa84-0739e727153c':'UserMotherName',
+	//'60f48fbf-d5e9-4a85-aa84-0739e727153c':'UserMotherName',
 	'2914814c-2a0f-4422-aff8-6bd3b09d3069':'UserWorkDomain',
-	'f3fac0c3-bc8b-4260-8b56-1608fd31c237':'UserFatherName',
+	//'f3fac0c3-bc8b-4260-8b56-1608fd31c237':'UserFatherName',
 	'0dd4cf0b-b774-439a-9997-5437cd78bfcd':'UserSpouseName',
 	'a8d3d878-9b92-4231-b25c-b22726985238':'UserWhatDoYouWantToBecome',
 	'9a4ad601-023b-467f-bbbe-bda1885f87c7':'UserClass',
@@ -37,7 +88,6 @@ const FIELD_ID_TO_COLUMN_MAPPING = {
 	'69a9dba2-e05e-40cd-a39c-047b9b676b5c':'UserSubject',
   '935bfb34-9be7-4676-b9cc-cec1ec4c0a2c':'UserMainSubject',
   '7b214a17-5a07-4ee0-bedc-271429862d30':'UserMedium',
-  '5a2dbb89-bbe6-4aa8-b541-93e01ab07b70':'UserGuardianName',
   
   // New field mappings added as requested
   'da594b2e-c645-4a96-af15-6e2d24587c9a':'UserPhoneType',                    // phone_type_accessible
@@ -50,6 +100,31 @@ const FIELD_ID_TO_COLUMN_MAPPING = {
   '8e8ab9b7-8ce0-4e6e-bf7e-0477a80734c8': 'IsManager',
   '27589b6d-6ece-457a-8d50-d15a3db02bf6': 'EMPManager',
   '93de5cc5-9437-4ca7-95f3-3b2f31b24093': 'ERPUserID',  // EMP_GROUP / GROUP_MEMBERSHIP
+
+  //shiksha custom fields
+  '9ce5c9c0-6400-42d4-9c14-407a76a47eb0': 'UserGrade', //exists
+  '679f4a27-09f9-4f78-85a0-9fe8bfd3ef18': 'UserFatherName', //exists
+  'd3644b9e-e9df-4f08-ae7b-1a6b4413fedf': 'UserMotherName', //exists
+  '53a44ba9-c8ed-43db-9fee-c2c81ae707b9': 'UserAccessToWhatsApp',
+  '5fce49b6-cd23-44f5-b87b-4ae0cbe2e328': 'UserProgram',
+  '08ab0a4e-4a72-498b-ad43-38fcb5e47586': 'UserGender',
+  'cec6c953-71b6-4c53-98b8-582aaa6008b5': 'UserDateOfJoining',
+  'f9f17574-4227-4ba3-a485-f8b1269ff086': 'UserTeacherID',
+  'e2395f11-a53d-4fb6-ab89-eae6367156f5': 'UserCEFRLevel',
+  '074643e8-8d53-4f14-956b-f7d0216f63e7': 'UserSubprograms',
+  '434fcadb-8508-42a9-bbed-03be19e8dfdb': 'UserOldTeacherID',
+  '4e4864d3-7049-49d0-b52a-4c9fbe7774b8': 'UserRole',
+  '5cfacade-9d56-4a1e-b4e9-cc8e8c6b04c5': 'UserVillageId',
+  'c3357b23-1394-48a9-afc5-7589873365ae': 'UserClusterId',
+  '26c55f7f-c691-440d-8c7f-88480c72f07b': 'UserSupervisors',
+  '2f7e6930-0bc2-4e69-8bd4-dde205fa5471': 'UserVillageID', //exists
+  '62340eaa-40fb-48b9-ba90-dcaa78be778e': 'UserDistrictID', //exists
+  '800265b1-9058-482a-94f4-726197e1dfe4': 'UserStateID',  //exists
+  '1e3e76e2-7f77-4fd7-a79f-abe5c33d4d08': 'UserBlockID', //exists
+  '3209e9e8-08dd-4d7f-a88f-1892d3fb7440': 'UserGender', 
+  '4fa37e71-bbd6-4dd1-9523-510edf63afb7': 'UserDateOfLeaving',
+  '11fe3a6b-3b32-43e4-bc50-1fc72bf5dd54': 'UserReasonForLeaving',
+  '0d501559-3bb2-44ed-8e33-850f6ed22666': 'UserDepartment'
 };
 
 /**
@@ -65,7 +140,7 @@ const BOOLEAN_DEST_COLUMNS = new Set([
 ]);
 
 async function migrateUsers() {
-  console.log('=== STARTING USER MIGRATION ===');
+  logger.log('=== STARTING USER MIGRATION ===');
   const sourceClient = new Client(dbConfig.source);
   const destClient = new Client(dbConfig.destination);
 
@@ -78,29 +153,31 @@ async function migrateUsers() {
     // Step 2: Migrate field values to custom columns
     await migrateFieldValues(sourceClient, destClient);
 
-    console.log('[USER MIGRATION] User migration completed successfully');
+    logger.log('[USER MIGRATION] User migration completed successfully');
   } catch (error) {
-    console.error('[USER MIGRATION] Error during user migration:', error);
+    logger.error('[USER MIGRATION] Error during user migration: ' + error.message);
+    logger.error(error.stack);
   } finally {
     await closeDBs(sourceClient, destClient);
+    logger.log('=== COMPLETED USER MIGRATION ===');
+    logger.close();
   }
-  console.log('=== COMPLETED USER MIGRATION ===');
 }
 
 async function connectToDBs(sourceClient, destClient) {
   await sourceClient.connect();
-  console.log('[USER MIGRATION] Connected to source database');
+  logger.log('[USER MIGRATION] Connected to source database');
   
   await destClient.connect();
-  console.log('[USER MIGRATION] Connected to destination database');
+  logger.log('[USER MIGRATION] Connected to destination database');
 }
 
 async function closeDBs(sourceClient, destClient) {
   await sourceClient.end();
-  console.log('[USER MIGRATION] Disconnected from source database');
+  logger.log('[USER MIGRATION] Disconnected from source database');
   
   await destClient.end();
-  console.log('[USER MIGRATION] Disconnected from destination database');
+  logger.log('[USER MIGRATION] Disconnected from destination database');
 }
 
 /**
@@ -147,34 +224,39 @@ function getFirstValue(values, columnName = null) {
  * @param {Client} destClient - The client for the destination database
  */
 async function migrateCoreUserData(sourceClient, destClient) {
-  console.log('[USER MIGRATION] Starting core user data migration...');
+  logger.log('[USER MIGRATION] Starting core user data migration...');
   
-  // Get all users excluding the specified tenantId (using UserTenantMapping table)
+  // Get all users
   const usersQuery = `
     SELECT u."userId", u.username, u."name", u.email, u.mobile, u.dob, u."createdAt", u."updatedAt", u."createdBy", u."updatedBy", u.status,
            u.district, u.state, u."firstName", u."middleName", u."lastName", u.gender, u."enrollmentId"
-    FROM public."Users" u
-    LEFT JOIN public."UserTenantMapping" utm ON u."userId" = utm."userId" WHERE utm."tenantId" = '914ca990-9b45-4385-a06b-05054f35d0b9';
-    ;
+    FROM public."Users" u;
   `;
+//   const usersQuery = `
+//   SELECT u."userId", u.username, u."name", u.email, u.mobile, u.dob, u."createdAt", u."updatedAt", u."createdBy", u."updatedBy", u.status,
+//          u.district, u.state, u."firstName", u."middleName", u."lastName", u.gender, u."enrollmentId"
+//   FROM public."Users" u
+//   LEFT JOIN public."UserTenantMapping" utm ON u."userId" = utm."userId" WHERE utm."tenantId" = '914ca990-9b45-4385-a06b-05054f35d0b9';
+//   ;
+// `;
   
   const usersResult = await sourceClient.query(usersQuery);
-  console.log(`[USER MIGRATION] Found ${usersResult.rows.length} users to migrate.`);
+  logger.log(`[USER MIGRATION] Found ${usersResult.rows.length} users to migrate.`);
   
   for (const user of usersResult.rows) {
     await processCoreUser(destClient, user);
     // After processing core user, migrate their field values
     await migrateUserFieldValues(sourceClient, destClient, user.userId);
-    console.log('[USER MIGRATION] 🛑 STOPPING AFTER ONE USER FOR TESTING');
+    logger.log('[USER MIGRATION] 🛑 STOPPING AFTER ONE USER FOR TESTING');
     // break; // Stop after first user for testing
   }
   
-  console.log('[USER MIGRATION] ✅ Finished core user data migration.');
+  logger.log('[USER MIGRATION] ✅ Finished core user data migration.');
 }
 
 async function processCoreUser(destClient, user) {
   try {
-    console.log(`[USER MIGRATION] Processing core user: ${user.userId}`);
+    logger.log(`[USER MIGRATION] Processing core user: ${user.userId}`);
     
     const insertQuery = `
       INSERT INTO public."Users"(
@@ -212,11 +294,12 @@ async function processCoreUser(destClient, user) {
     
     const result = await destClient.query(insertQuery, values);
     if (result.rows && result.rows.length > 0) {
-      console.log(`[USER MIGRATION] ✅ Successfully inserted/updated core user: ${result.rows[0].UserID}`);
+      logger.log(`[USER MIGRATION] ✅ Successfully inserted/updated core user: ${result.rows[0].UserID}`);
     }
     
   } catch (error) {
-    console.error(`[USER MIGRATION] Error processing core user ${user.userId}:`, error);
+    logger.error(`[USER MIGRATION] Error processing core user ${user.userId}: ${error.message}`);
+    logger.error(error.stack);
   }
 }
 
@@ -262,7 +345,7 @@ async function fetchFieldNamesByIds(sourceClient, fieldIds) {
  * @param {string} userId - The specific user ID to migrate field values for
  */
 async function migrateUserFieldValues(sourceClient, destClient, userId) {
-  console.log(`[USER MIGRATION] Starting field values migration for user: ${userId}...`);
+  logger.log(`[USER MIGRATION] Starting field values migration for user: ${userId}...`);
   
   // Get field values for this specific user
   const fieldValuesQuery = `
@@ -272,16 +355,16 @@ async function migrateUserFieldValues(sourceClient, destClient, userId) {
   `;
   
   const fieldValuesResult = await sourceClient.query(fieldValuesQuery, [userId]);
-  console.log(`[USER MIGRATION] Found ${fieldValuesResult.rows.length} field value records for user ${userId}.`);
+  logger.log(`[USER MIGRATION] Found ${fieldValuesResult.rows.length} field value records for user ${userId}.`);
   
   if (fieldValuesResult.rows.length === 0) {
-    console.log(`[USER MIGRATION] No field values found for user ${userId}, skipping field values migration.`);
+    logger.log(`[USER MIGRATION] No field values found for user ${userId}, skipping field values migration.`);
     return;
   }
   
   // Log all fieldIds found for debugging
   const allFieldIds = fieldValuesResult.rows.map(row => row.fieldId);
-  console.log(`[USER MIGRATION] All fieldIds found for user ${userId}:`, allFieldIds);
+  logger.log(`[USER MIGRATION] All fieldIds found for user ${userId}: ${JSON.stringify(allFieldIds)}`);
   
   // Check if the new fieldIds are present
   const newFieldIds = [
@@ -293,9 +376,9 @@ async function migrateUserFieldValues(sourceClient, destClient, userId) {
     newFieldIds.some(newId => String(id).toLowerCase() === newId.toLowerCase())
   );
   if (foundNewFieldIds.length > 0) {
-    console.log(`[USER MIGRATION] 🎯 Found ${foundNewFieldIds.length} of the 3 new fieldIds:`, foundNewFieldIds);
+    logger.log(`[USER MIGRATION] 🎯 Found ${foundNewFieldIds.length} of the 3 new fieldIds: ${JSON.stringify(foundNewFieldIds)}`);
   } else {
-    console.log(`[USER MIGRATION] ⚠️ None of the 3 new fieldIds found in data for user ${userId}`);
+    logger.log(`[USER MIGRATION] ⚠️ None of the 3 new fieldIds found in data for user ${userId}`);
   }
 
   // Process field values strictly by fieldId mapping
@@ -317,7 +400,7 @@ async function migrateUserFieldValues(sourceClient, destClient, userId) {
       );
       if (matchingKey) {
         columnName = FIELD_ID_TO_COLUMN_MAPPING[matchingKey];
-        console.log(`[USER MIGRATION] 🔄 Matched fieldId ${originalFieldId} (normalized) to column: ${columnName}`);
+        logger.log(`[USER MIGRATION] 🔄 Matched fieldId ${originalFieldId} (normalized) to column: ${columnName}`);
       }
     }
     
@@ -331,32 +414,45 @@ async function migrateUserFieldValues(sourceClient, destClient, userId) {
       const normalizedNewFieldIds = newFieldIds.map(id => id.toLowerCase());
       
       if (normalizedNewFieldIds.includes(normalizedFieldId)) {
-        console.log(`[USER MIGRATION] ⚠️ WARNING: New fieldId ${originalFieldId} (normalized: ${normalizedFieldId}) not found in mapping!`);
-        console.log(`[USER MIGRATION] Available mapping keys (first 5):`, Object.keys(FIELD_ID_TO_COLUMN_MAPPING).slice(0, 5));
+        logger.warn(`[USER MIGRATION] ⚠️ WARNING: New fieldId ${originalFieldId} (normalized: ${normalizedFieldId}) not found in mapping!`);
+        logger.log(`[USER MIGRATION] Available mapping keys (first 5): ${JSON.stringify(Object.keys(FIELD_ID_TO_COLUMN_MAPPING).slice(0, 5))}`);
       }
       continue;
     }
     
-    console.log(`[USER MIGRATION] ✅ Processing fieldId ${originalFieldId} -> ${columnName}, value:`, value);
+    logger.log(`[USER MIGRATION] ✅ Processing fieldId ${originalFieldId} -> ${columnName}, value: ${JSON.stringify(value)}`);
     const convertedValue = getFirstValue(value, columnName);
-    console.log(`[USER MIGRATION] Converted value for ${columnName}:`, convertedValue);
-    userFieldValues[columnName] = convertedValue;
+    logger.log(`[USER MIGRATION] Converted value for ${columnName}: ${JSON.stringify(convertedValue)}`);
+    
+    // Handle multiple field IDs mapping to the same column
+    // Prefer non-null values - if column already has a value and new value is null, keep existing
+    // If both have values, the last one processed will be used (or we could prefer non-null)
+    if (userFieldValues.hasOwnProperty(columnName) && userFieldValues[columnName] !== null && convertedValue === null) {
+      logger.log(`[USER MIGRATION] ⚠️ Column ${columnName} already has value ${JSON.stringify(userFieldValues[columnName])}, keeping existing value (new value is null)`);
+      // Keep existing value
+    } else if (userFieldValues.hasOwnProperty(columnName) && userFieldValues[columnName] !== null && convertedValue !== null) {
+      logger.log(`[USER MIGRATION] ⚠️ Multiple field IDs map to ${columnName}: existing=${JSON.stringify(userFieldValues[columnName])}, new=${JSON.stringify(convertedValue)}, using new value`);
+      userFieldValues[columnName] = convertedValue;
+    } else {
+      // First value or replacing null with non-null
+      userFieldValues[columnName] = convertedValue;
+    }
   }
   
   // Update this user's record in the destination database
   if (Object.keys(userFieldValues).length > 0) {
-    console.log(`[USER MIGRATION] 📊 Summary for user ${userId}: Migrating ${Object.keys(userFieldValues).length} fields:`, Object.keys(userFieldValues));
+    logger.log(`[USER MIGRATION] 📊 Summary for user ${userId}: Migrating ${Object.keys(userFieldValues).length} fields: ${JSON.stringify(Object.keys(userFieldValues))}`);
     // Check if the new fields are in the migration
     const newFieldColumns = ['IsManager', 'EMPManager', 'ERPUserID'];
     const migratedNewFields = Object.keys(userFieldValues).filter(col => newFieldColumns.includes(col));
     if (migratedNewFields.length > 0) {
-      console.log(`[USER MIGRATION] ✅ Successfully mapped new fields:`, migratedNewFields);
+      logger.log(`[USER MIGRATION] ✅ Successfully mapped new fields: ${JSON.stringify(migratedNewFields)}`);
     } else {
-      console.log(`[USER MIGRATION] ⚠️ New fields (IsManager, EMPManager, ERPUserID) not in migration for user ${userId}`);
+      logger.log(`[USER MIGRATION] ⚠️ New fields (IsManager, EMPManager, ERPUserID) not in migration for user ${userId}`);
     }
     await processUser(destClient, userId, userFieldValues);
   } else {
-    console.log(`[USER MIGRATION] No mappable field values found for user ${userId}.`);
+    logger.log(`[USER MIGRATION] No mappable field values found for user ${userId}.`);
   }
 }
 
@@ -366,7 +462,7 @@ async function migrateUserFieldValues(sourceClient, destClient, userId) {
  * @param {Client} destClient - The client for the destination database
  */
 async function migrateFieldValues(sourceClient, destClient) {
-  console.log('[USER MIGRATION] Field values migration will be handled per user during core user processing.');
+  logger.log('[USER MIGRATION] Field values migration will be handled per user during core user processing.');
 }
 
 async function processUser(destClient, userId, fieldData) {
@@ -375,7 +471,7 @@ async function processUser(destClient, userId, fieldData) {
       return; // Skip if no mapped fields for this user
     }
     
-    console.log(`[USER MIGRATION] Processing user: ${userId}`);
+    logger.log(`[USER MIGRATION] Processing user: ${userId}`);
     
     // Build dynamic UPDATE query
     const setClause = [];
@@ -396,14 +492,15 @@ async function processUser(destClient, userId, fieldData) {
 
     const result = await destClient.query(updateQuery, values);
     if (result.rowCount > 0) {
-      console.log(`[USER MIGRATION] ✅ Updated user ${userId} with ${Object.keys(fieldData).length} field values`);
+      logger.log(`[USER MIGRATION] ✅ Updated user ${userId} with ${Object.keys(fieldData).length} field values`);
     } else {
-      console.warn(`[USER MIGRATION] ⚠️ No user found with UserID: ${userId} in destination database`);
+      logger.warn(`[USER MIGRATION] ⚠️ No user found with UserID: ${userId} in destination database`);
     }
     
-    console.log(`[USER MIGRATION] Completed processing user: ${userId}`);
+    logger.log(`[USER MIGRATION] Completed processing user: ${userId}`);
   } catch (error) {
-    console.error(`[USER MIGRATION] Error processing user ${userId}:`, error);
+    logger.error(`[USER MIGRATION] Error processing user ${userId}: ${error.message}`);
+    logger.error(error.stack);
   }
 }
 
@@ -416,13 +513,15 @@ async function processUser(destClient, userId, fieldData) {
 
 // Run the migration only if this script is run directly (not imported)
 if (require.main === module) {
-  console.log('Running user-migration.js directly');
+  logger.log('Running user-migration.js directly');
   migrateUsers().catch(err => {
-    console.error('User migration failed:', err);
+    logger.error('User migration failed: ' + err.message);
+    logger.error(err.stack);
+    logger.close();
     process.exit(1);
   });
 } else {
-  console.log('user-migration.js loaded as a module');
+  logger.log('user-migration.js loaded as a module');
 }
 
 module.exports = {
