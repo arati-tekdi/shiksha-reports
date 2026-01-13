@@ -101,10 +101,10 @@ export class User {
   @Column({
     name: 'UserPhoneType',
     type: 'varchar',
-    length: 150,
+    length: 50,
     nullable: true,
   })
-  phoneTypeAccessible?: string;
+  userPhoneType?: string;
 
   @Column({
     name: 'UserWhatDoYouWantToBecome',
@@ -242,7 +242,7 @@ export class User {
   @Column({
     name: 'JobFamily',
     type: 'varchar',
-    length: 200,
+    length: 150,
     nullable: true,
   })
   jobFamily?: string;
@@ -250,7 +250,7 @@ export class User {
   @Column({
     name: 'PSU',
     type: 'varchar',
-    length: 200,
+    length: 150,
     nullable: true,
   })
   psu?: string;
@@ -258,7 +258,7 @@ export class User {
   @Column({
     name: 'GroupMembership',
     type: 'varchar',
-    length: 200,
+    length: 150,
     nullable: true,
   })
   groupMembership?: string;
@@ -269,10 +269,55 @@ export class User {
   @Column({ name: 'ERPUserID', type: 'text', nullable: true })
   erpUserId?: string;
 
-  @Column({ name: 'IsManager', type: 'text', nullable: true })
-  isManager?: string;
+  @Column({ name: 'IsManager', type: 'boolean', nullable: true, default: false })
+  isManager?: boolean;
 
   @Column({ name: 'UserLastLogin', type: "timestamptz", nullable: true })
-  userLastLogin: Date | null; // Timestamp for last login
+  userLastLogin?: Date;
+
+  @Column({ name: 'UserCustomField', type: 'jsonb', nullable: true })
+  userCustomField?: any;
+
+  @Column({ name: 'UserAccessToWhatsApp', type: 'text', nullable: true })
+  userAccessToWhatsApp?: string;
+
+  @Column({ name: 'UserProgram', type: 'text', nullable: true })
+  userProgram?: string;
+
+  @Column({ name: 'UserDateOfJoining', type: 'date', nullable: true })
+  userDateOfJoining?: Date;
+
+  @Column({ name: 'UserTeacherID', type: 'text', nullable: true })
+  userTeacherID?: string;
+
+  @Column({ name: 'UserCEFRLevel', type: 'text', nullable: true })
+  userCEFRLevel?: string;
+
+  @Column({ name: 'UserSubprograms', type: 'text', nullable: true })
+  userSubprograms?: string;
+
+  @Column({ name: 'UserOldTeacherID', type: 'text', nullable: true })
+  userOldTeacherID?: string;
+
+  @Column({ name: 'UserRole', type: 'text', nullable: true })
+  userRole?: string;
+
+  @Column({ name: 'UserVillageId', type: 'text', nullable: true })
+  userVillageId?: string;
+
+  @Column({ name: 'UserClusterId', type: 'text', nullable: true })
+  userClusterId?: string;
+
+  @Column({ name: 'UserSupervisors', type: 'text', nullable: true })
+  userSupervisors?: string;
+
+  @Column({ name: 'UserDateOfLeaving', type: 'date', nullable: true })
+  userDateOfLeaving?: Date;
+
+  @Column({ name: 'UserReasonForLeaving', type: 'text', nullable: true })
+  userReasonForLeaving?: string;
+
+  @Column({ name: 'UserDepartment', type: 'text', nullable: true })
+  userDepartment?: string;
 
 }
