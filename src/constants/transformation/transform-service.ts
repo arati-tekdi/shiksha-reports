@@ -24,7 +24,11 @@ import { Content } from 'src/entities/content.entity';
 import { Project } from 'src/entities/project.entity';
 import { ProjectTask } from 'src/entities/projectTask.entity';
 import { ProjectTaskTracking } from 'src/entities/projectTaskTracking.entity';
-import { ExternalCourseData, ExternalQuestionSetData, ExternalContentData } from 'src/types/cron.types';
+import {
+  ExternalCourseData,
+  ExternalQuestionSetData,
+  ExternalContentData,
+} from 'src/types/cron.types';
 import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
@@ -61,7 +65,7 @@ export class TransformService {
           selectedValue !== null
         ) {
           // Return the 'value' property if it exists, otherwise 'id'
-          return selectedValue.id ;
+          return selectedValue.id;
         }
 
         return null;
@@ -72,7 +76,9 @@ export class TransformService {
         if (!data.customFields || !Array.isArray(data.customFields)) {
           return null;
         }
-        const field = data?.customFields.find((f: any) => f?.fieldId === fieldId);
+        const field = data?.customFields.find(
+          (f: any) => f?.fieldId === fieldId,
+        );
 
         if (
           !field ||
@@ -186,9 +192,15 @@ export class TransformService {
         //),
 
         // ERP and Manager fields (extracted by fieldId)
-        erpUserId: extractCustomFieldById('93de5cc5-9437-4ca7-95f3-3b2f31b24093'),
-        isManager: convertToBoolean(extractCustomFieldById('8e8ab9b7-8ce0-4e6e-bf7e-0477a80734c8')),
-        empManager: extractCustomFieldById('27589b6d-6ece-457a-8d50-d15a3db02bf6'),
+        erpUserId: extractCustomFieldById(
+          '93de5cc5-9437-4ca7-95f3-3b2f31b24093',
+        ),
+        isManager: convertToBoolean(
+          extractCustomFieldById('8e8ab9b7-8ce0-4e6e-bf7e-0477a80734c8'),
+        ),
+        empManager: extractCustomFieldById(
+          '27589b6d-6ece-457a-8d50-d15a3db02bf6',
+        ),
         // JobFamily, PSU, GroupMembership mapped to proper columns
         jobFamily: extractCustomField('JOB_FAMILY'),
         psu: extractCustomField('PSU'),
@@ -196,50 +208,146 @@ export class TransformService {
         //groupMembership: extractCustomField('EMP_GROUP'),
 
         // Additional fields extracted by fieldId for shiksha
-        userPreferredModeOfLearning: extractCustomFieldById('7b43db0a-f4c3-4c77-919f-622509ca7add'),
-        userWorkDomain: extractCustomFieldById('2914814c-2a0f-4422-aff8-6bd3b09d3069'),
-        userSpouseName: extractCustomFieldById('0dd4cf0b-b774-439a-9997-5437cd78bfcd'),
-        userWhatDoYouWantToBecome: extractCustomFieldById('a8d3d878-9b92-4231-b25c-b22726985238'),
-        userClass: extractCustomFieldById('9a4ad601-023b-467f-bbbe-bda1885f87c7'),
-        userPreferredLanguage: extractCustomFieldById('4b9d798d-e8f2-4ae5-b177-a57655aa5d1c'),
-        userParentPhone: extractCustomFieldById('7ecaa845-901a-4ac7-a136-eed087f3b85b'),
-        userGuardianRelation: extractCustomFieldById('3a7bf305-6bac-4377-bf09-f38af866105c'),
-        userSubjectTaught: extractCustomFieldById('abb7f3fe-f7fa-47be-9d28-5747dd3159f2'),
-        userMaritalStatus: extractCustomFieldById('ff472647-6c40-42e6-b200-dc74b241e915'),
-        userGrade: extractCustomFieldById('5a2dbb89-bbe6-4aa8-b541-93e01ab07b70'),
-        userTrainingCheck: convertToBoolean(extractCustomFieldById('0be5a8c6-92e9-4b7c-ac01-345131b06118')),
-        userDropOutReason: extractCustomFieldById('4f48571b-88fd-43b9-acb3-91afda7901ac'),
-        userOwnPhoneCheck: convertToBoolean(extractCustomFieldById('d119d92f-fab7-4c7d-8370-8b40b5ed23dc')),
-        userEnrollmentNumber: extractCustomFieldById('e2f1fcbc-a76a-4b51-a092-ae4823bc45fd'),
-        userDesignation: extractCustomFieldById('4fc098c5-bec5-4afc-a15d-093805b05119'),
-        userBoard: extractCustomFieldById('f93c0ac3-f827-4794-9457-441fa1057b42'),
-        userSubject: extractCustomFieldById('69a9dba2-e05e-40cd-a39c-047b9b676b5c'),
-        userMainSubject: extractCustomFieldById('935bfb34-9be7-4676-b9cc-cec1ec4c0a2c'),
-        userMedium: extractCustomFieldById('7b214a17-5a07-4ee0-bedc-271429862d30'),
-        userPhoneType: extractCustomFieldById('da594b2e-c645-4a96-af15-6e2d24587c9a'),
-        userNumOfChildrenWorkingWith: extractCustomFieldById('a4c2dace-e052-4e78-b6ad-9ffcc035c578'),
-        groupMembership: extractCustomFieldById('29c36dd1-315c-46d9-bf6a-f1858ae71c33'),
-        userFatherName: extractCustomFieldById('679f4a27-09f9-4f78-85a0-9fe8bfd3ef18'),
-        userMotherName: extractCustomFieldById('d3644b9e-e9df-4f08-ae7b-1a6b4413fedf'),
-        userAccessToWhatsApp: extractCustomFieldById('53a44ba9-c8ed-43db-9fee-c2c81ae707b9'),
-        userProgram: extractCustomFieldById('5fce49b6-cd23-44f5-b87b-4ae0cbe2e328'),
-        userGender: extractCustomFieldById('08ab0a4e-4a72-498b-ad43-38fcb5e47586'),
-        userDateOfJoining: convertToDate(extractCustomFieldById('cec6c953-71b6-4c53-98b8-582aaa6008b5')),
-        userTeacherID: extractCustomFieldById('f9f17574-4227-4ba3-a485-f8b1269ff086'),
-        userCEFRLevel: extractCustomFieldById('e2395f11-a53d-4fb6-ab89-eae6367156f5'),
-        userSubprograms: extractCustomFieldById('074643e8-8d53-4f14-956b-f7d0216f63e7'),
-        userOldTeacherID: extractCustomFieldById('434fcadb-8508-42a9-bbed-03be19e8dfdb'),
-        userRole: extractCustomFieldById('4e4864d3-7049-49d0-b52a-4c9fbe7774b8'),
-        userVillageId: extractCustomFieldById('5cfacade-9d56-4a1e-b4e9-cc8e8c6b04c5'),
-        userClusterId: extractCustomFieldById('c3357b23-1394-48a9-afc5-7589873365ae'),
-        userSupervisors: extractCustomFieldById('26c55f7f-c691-440d-8c7f-88480c72f07b'),
-        userVillageID: extractCustomFieldById('2f7e6930-0bc2-4e69-8bd4-dde205fa5471'),
-        userDistrictID: extractCustomFieldById('62340eaa-40fb-48b9-ba90-dcaa78be778e'),
-        userStateID: extractCustomFieldById('800265b1-9058-482a-94f4-726197e1dfe4'),
-        userBlockID: extractCustomFieldById('1e3e76e2-7f77-4fd7-a79f-abe5c33d4d08'),
-        userDateOfLeaving: convertToDate(extractCustomFieldById('4fa37e71-bbd6-4dd1-9523-510edf63afb7')),
-        userReasonForLeaving: extractCustomFieldById('11fe3a6b-3b32-43e4-bc50-1fc72bf5dd54'),
-        userDepartment: extractCustomFieldById('0d501559-3bb2-44ed-8e33-850f6ed22666'),
+        userPreferredModeOfLearning: extractCustomFieldById(
+          '7b43db0a-f4c3-4c77-919f-622509ca7add',
+        ),
+        userWorkDomain: extractCustomFieldById(
+          '2914814c-2a0f-4422-aff8-6bd3b09d3069',
+        ),
+        userSpouseName: extractCustomFieldById(
+          '0dd4cf0b-b774-439a-9997-5437cd78bfcd',
+        ),
+        userWhatDoYouWantToBecome: extractCustomFieldById(
+          'a8d3d878-9b92-4231-b25c-b22726985238',
+        ),
+        userClass: extractCustomFieldById(
+          '9a4ad601-023b-467f-bbbe-bda1885f87c7',
+        ),
+        userPreferredLanguage: extractCustomFieldById(
+          '4b9d798d-e8f2-4ae5-b177-a57655aa5d1c',
+        ),
+        userParentPhone: extractCustomFieldById(
+          '7ecaa845-901a-4ac7-a136-eed087f3b85b',
+        ),
+        userGuardianRelation: extractCustomFieldById(
+          '3a7bf305-6bac-4377-bf09-f38af866105c',
+        ),
+        userSubjectTaught: extractCustomFieldById(
+          'abb7f3fe-f7fa-47be-9d28-5747dd3159f2',
+        ),
+        userMaritalStatus: extractCustomFieldById(
+          'ff472647-6c40-42e6-b200-dc74b241e915',
+        ),
+        userGrade: extractCustomFieldById(
+          '5a2dbb89-bbe6-4aa8-b541-93e01ab07b70',
+        ),
+        userTrainingCheck: convertToBoolean(
+          extractCustomFieldById('0be5a8c6-92e9-4b7c-ac01-345131b06118'),
+        ),
+        userDropOutReason: extractCustomFieldById(
+          '4f48571b-88fd-43b9-acb3-91afda7901ac',
+        ),
+        userOwnPhoneCheck: convertToBoolean(
+          extractCustomFieldById('d119d92f-fab7-4c7d-8370-8b40b5ed23dc'),
+        ),
+        userEnrollmentNumber: extractCustomFieldById(
+          'e2f1fcbc-a76a-4b51-a092-ae4823bc45fd',
+        ),
+        userDesignation: extractCustomFieldById(
+          '4fc098c5-bec5-4afc-a15d-093805b05119',
+        ),
+        userBoard: extractCustomFieldById(
+          'f93c0ac3-f827-4794-9457-441fa1057b42',
+        ),
+        userSubject: extractCustomFieldById(
+          '69a9dba2-e05e-40cd-a39c-047b9b676b5c',
+        ),
+        userMainSubject: extractCustomFieldById(
+          '935bfb34-9be7-4676-b9cc-cec1ec4c0a2c',
+        ),
+        userMedium: extractCustomFieldById(
+          '7b214a17-5a07-4ee0-bedc-271429862d30',
+        ),
+        userPhoneType: extractCustomFieldById(
+          'da594b2e-c645-4a96-af15-6e2d24587c9a',
+        ),
+        userNumOfChildrenWorkingWith: extractCustomFieldById(
+          'a4c2dace-e052-4e78-b6ad-9ffcc035c578',
+        ),
+        groupMembership: extractCustomFieldById(
+          '29c36dd1-315c-46d9-bf6a-f1858ae71c33',
+        ),
+        userFatherName: extractCustomFieldById(
+          '679f4a27-09f9-4f78-85a0-9fe8bfd3ef18',
+        ),
+        userMotherName: extractCustomFieldById(
+          'd3644b9e-e9df-4f08-ae7b-1a6b4413fedf',
+        ),
+        userAccessToWhatsApp: extractCustomFieldById(
+          '53a44ba9-c8ed-43db-9fee-c2c81ae707b9',
+        ),
+        userProgram: extractCustomFieldById(
+          '5fce49b6-cd23-44f5-b87b-4ae0cbe2e328',
+        ),
+        userGender: extractCustomFieldById(
+          '08ab0a4e-4a72-498b-ad43-38fcb5e47586',
+        ),
+        userDateOfJoining: convertToDate(
+          extractCustomFieldById('cec6c953-71b6-4c53-98b8-582aaa6008b5'),
+        ),
+        userTeacherID: extractCustomFieldById(
+          'f9f17574-4227-4ba3-a485-f8b1269ff086',
+        ),
+        userCEFRLevel: extractCustomFieldById(
+          'e2395f11-a53d-4fb6-ab89-eae6367156f5',
+        ),
+        userSubprograms: extractCustomFieldById(
+          '074643e8-8d53-4f14-956b-f7d0216f63e7',
+        ),
+        userOldTeacherID: extractCustomFieldById(
+          '434fcadb-8508-42a9-bbed-03be19e8dfdb',
+        ),
+        userRole: extractCustomFieldById(
+          '4e4864d3-7049-49d0-b52a-4c9fbe7774b8',
+        ),
+        userVillageId: extractCustomFieldById(
+          'e4de6f2a-f4b3-4f66-b1be-fcbe8ff607d3',
+        ) || extractCustomFieldById(
+          '5cfacade-9d56-4a1e-b4e9-cc8e8c6b04c5',
+        ) || extractCustomFieldById(
+          '2f7e6930-0bc2-4e69-8bd4-dde205fa5471',
+        ),
+        userClusterId: extractCustomFieldById(
+          'c3357b23-1394-48a9-afc5-7589873365ae',
+        ),
+        userSupervisors: extractCustomFieldById(
+          '26c55f7f-c691-440d-8c7f-88480c72f07b',
+        ),
+        
+        userDistrictId: extractCustomFieldById(
+          'd4ad6f2a-f4b3-4f66-b1be-fcbe8ff607f3',
+        ) || extractCustomFieldById(
+          '62340eaa-40fb-48b9-ba90-dcaa78be778e',
+        ),
+        userStateId: extractCustomFieldById(
+          '800265b1-9058-482a-94f4-726197e1dfe4',
+        ) ||  extractCustomFieldById(
+          'b4ad6f2a-f4b3-4f66-b1be-fcbe8ff607e3',
+        ),
+        userBlockId: extractCustomFieldById(
+          '1e3e76e2-7f77-4fd7-a79f-abe5c33d4d08',
+        ) || extractCustomFieldById(
+          'e4bc6f2a-f4b3-4f66-b1be-fcbe8ff607f3',
+        ),
+        userDateOfLeaving: convertToDate(
+          extractCustomFieldById('4fa37e71-bbd6-4dd1-9523-510edf63afb7'),
+        ),
+        userReasonForLeaving: extractCustomFieldById(
+          '11fe3a6b-3b32-43e4-bc50-1fc72bf5dd54',
+        ),
+        userDepartment: extractCustomFieldById(
+          '0d501559-3bb2-44ed-8e33-850f6ed22666',
+        ),
       };
 
       return transformedData;
@@ -421,22 +529,57 @@ export class TransformService {
 
         // Additional fields extracted by fieldId for shiksha
         coBoard: extractCustomFieldById('f93c0ac3-f827-4794-9457-441fa1057b42'),
-        coSubject: extractCustomFieldById('69a9dba2-e05e-40cd-a39c-047b9b676b5c'),
+        coSubject: extractCustomFieldById(
+          '69a9dba2-e05e-40cd-a39c-047b9b676b5c',
+        ),
         coGrade: extractCustomFieldById('5a2dbb89-bbe6-4aa8-b541-93e01ab07b70'),
-        coMedium: extractCustomFieldById('7b214a17-5a07-4ee0-bedc-271429862d30'),
-        coIndustry: extractCustomFieldById('e5277d7b-e7ef-4a11-9a54-a8e6e7975383'),
-        coGoogleMapLink: extractCustomFieldById('e9f8acbb-b10d-4b46-9584-f5ec453c250e'),
-        coProgram: extractCustomFieldById('5fce49b6-cd23-44f5-b87b-4ae0cbe2e328'),
-        coCluster: extractCustomFieldById('c3357b23-1394-48a9-afc5-7589873365ae'),
-        coLongitude: extractCustomFieldById('fe466e4e-193b-4d01-863d-cf861d8d5bf5'),
-        coLatitude: extractCustomFieldById('fd466e4e-193b-4d01-863d-cf861d8d5bf4'),
-        coSchoolType: extractCustomFieldById('c4ad6f2a-f4b3-4f66-b1be-fcbe8ff607e3'),
+        coMedium: extractCustomFieldById(
+          '7b214a17-5a07-4ee0-bedc-271429862d30',
+        ),
+        coIndustry: extractCustomFieldById(
+          'e5277d7b-e7ef-4a11-9a54-a8e6e7975383',
+        ),
+        coGoogleMapLink: extractCustomFieldById(
+          'e9f8acbb-b10d-4b46-9584-f5ec453c250e',
+        ),
+        coProgram: extractCustomFieldById(
+          '5fce49b6-cd23-44f5-b87b-4ae0cbe2e328',
+        ),
+        coCluster: extractCustomFieldById(
+          'c3357b23-1394-48a9-afc5-7589873365ae',
+        ),
+        coLongitude: extractCustomFieldById(
+          'fe466e4e-193b-4d01-863d-cf861d8d5bf5',
+        ),
+        coLatitude: extractCustomFieldById(
+          'fd466e4e-193b-4d01-863d-cf861d8d5bf4',
+        ),
+        coSchoolType: extractCustomFieldById(
+          'c4ad6f2a-f4b3-4f66-b1be-fcbe8ff607e3',
+        ),
         // Multiple field IDs mapping to same location columns - using first occurrence
-        coDistrictId: extractCustomFieldById('d4ad6f2a-f4b3-4f66-b1be-fcbe8ff607f3'),
-        coStateId: extractCustomFieldById('b4ad6f2a-f4b3-4f66-b1be-fcbe8ff607e3'),
-        coBlockId: extractCustomFieldById('e4bc6f2a-f4b3-4f66-b1be-fcbe8ff607f3'),
-        coVillageId: extractCustomFieldById('e4de6f2a-f4b3-4f66-b1be-fcbe8ff607d3'),
-        
+        coDistrictId: extractCustomFieldById(
+          'd4ad6f2a-f4b3-4f66-b1be-fcbe8ff607f3',
+        ) || extractCustomFieldById(
+          '62340eaa-40fb-48b9-ba90-dcaa78be778e',
+        ),
+        coStateId: extractCustomFieldById(
+          'b4ad6f2a-f4b3-4f66-b1be-fcbe8ff607e3',
+        ) || extractCustomFieldById(
+          '800265b1-9058-482a-94f4-726197e1dfe4',
+        ),
+        coBlockId: extractCustomFieldById(
+          '1e3e76e2-7f77-4fd7-a79f-abe5c33d4d08',
+        ) || extractCustomFieldById(
+          'e4bc6f2a-f4b3-4f66-b1be-fcbe8ff607f3',
+        ),
+        coVillageId: extractCustomFieldById(
+          'e4de6f2a-f4b3-4f66-b1be-fcbe8ff607d3',
+        ) || extractCustomFieldById(
+          '5cfacade-9d56-4a1e-b4e9-cc8e8c6b04c5',
+        ) || extractCustomFieldById(
+          '2f7e6930-0bc2-4e69-8bd4-dde205fa5471',
+        ),
       };
 
       console.log(
@@ -645,7 +788,11 @@ export class TransformService {
                 tenantRegnDate: platformRegnDate, // Same as platform date for new registrations
                 isActive: true,
                 // Include reason if provided (from tenant, role, or data level)
-                reason: (tenant as any).reason || (role as any).reason || (data as any).reason || undefined,
+                reason:
+                  (tenant as any).reason ||
+                  (role as any).reason ||
+                  (data as any).reason ||
+                  undefined,
               };
               registrationTrackers.push(registrationTracker);
             }
@@ -663,7 +810,9 @@ export class TransformService {
   /**
    * Transform external course data to Course entity format
    */
-  async transformExternalCourseData(data: ExternalCourseData): Promise<Partial<Course>> {
+  async transformExternalCourseData(
+    data: ExternalCourseData,
+  ): Promise<Partial<Course>> {
     try {
       // Validate required fields
       if (!data.identifier) {
@@ -671,30 +820,32 @@ export class TransformService {
       }
 
       // Transform date fields
-      const transformDate = (dateValue: string | Date | null | undefined): Date | null => {
+      const transformDate = (
+        dateValue: string | Date | null | undefined,
+      ): Date | null => {
         if (!dateValue) return null;
-        
+
         if (typeof dateValue === 'string') {
           const parsed = new Date(dateValue);
           return isNaN(parsed.getTime()) ? null : parsed;
         }
-        
+
         if (dateValue instanceof Date) {
           return isNaN(dateValue.getTime()) ? null : dateValue;
         }
-        
+
         return null;
       };
 
       // Transform text fields to handle arrays and objects
       const transformText = (value: any): string | null => {
         if (!value) return null;
-        
+
         if (typeof value === 'string') return value;
         if (typeof value === 'number') return value.toString();
         if (Array.isArray(value)) return value.join(', ');
         if (typeof value === 'object') return JSON.stringify(value);
-        
+
         return null;
       };
 
@@ -728,7 +879,9 @@ export class TransformService {
   /**
    * Transform external question set data to QuestionSet entity format
    */
-  async transformQuestionSetData(data: ExternalQuestionSetData): Promise<Partial<QuestionSet>> {
+  async transformQuestionSetData(
+    data: ExternalQuestionSetData,
+  ): Promise<Partial<QuestionSet>> {
     try {
       // Validate required fields
       if (!data.identifier) {
@@ -736,35 +889,40 @@ export class TransformService {
       }
 
       // Transform date fields
-      const transformDate = (dateValue: string | Date | null | undefined): Date | null => {
+      const transformDate = (
+        dateValue: string | Date | null | undefined,
+      ): Date | null => {
         if (!dateValue) return null;
-        
+
         if (typeof dateValue === 'string') {
           const parsed = new Date(dateValue);
           return isNaN(parsed.getTime()) ? null : parsed;
         }
-        
+
         if (dateValue instanceof Date) {
           return isNaN(dateValue.getTime()) ? null : dateValue;
         }
-        
+
         return null;
       };
 
       // Transform text fields to handle arrays and objects
       const transformText = (value: any): string | null => {
         if (!value) return null;
-        
+
         if (typeof value === 'string') return value;
         if (typeof value === 'number') return value.toString();
         if (Array.isArray(value)) return value.join(', ');
         if (typeof value === 'object') return JSON.stringify(value);
-        
+
         return null;
       };
 
       // Handle different field name variations from API
-      const getFieldValue = (primaryField: any, alternativeField?: any): any => {
+      const getFieldValue = (
+        primaryField: any,
+        alternativeField?: any,
+      ): any => {
         return primaryField || alternativeField || null;
       };
 
@@ -775,7 +933,9 @@ export class TransformService {
         createdOn: transformDate(getFieldValue(data.createdOn)),
         program: transformText(getFieldValue(data.program)),
         assessmentType: data.assessmentType || null,
-        contentLanguage: transformText(getFieldValue(data.contentLanguage, data.language)),
+        contentLanguage: transformText(
+          getFieldValue(data.contentLanguage, data.language),
+        ),
       };
 
       return transformedData;
@@ -791,7 +951,9 @@ export class TransformService {
   /**
    * Transform external content data to Content entity format
    */
-  async transformContentData(data: ExternalContentData): Promise<Partial<Content>> {
+  async transformContentData(
+    data: ExternalContentData,
+  ): Promise<Partial<Content>> {
     try {
       // Validate required fields
       if (!data.identifier) {
@@ -799,30 +961,32 @@ export class TransformService {
       }
 
       // Transform date fields
-      const transformDate = (dateValue: string | Date | null | undefined): Date | null => {
+      const transformDate = (
+        dateValue: string | Date | null | undefined,
+      ): Date | null => {
         if (!dateValue) return null;
-        
+
         if (typeof dateValue === 'string') {
           const parsed = new Date(dateValue);
           return isNaN(parsed.getTime()) ? null : parsed;
         }
-        
+
         if (dateValue instanceof Date) {
           return isNaN(dateValue.getTime()) ? null : dateValue;
         }
-        
+
         return null;
       };
 
       // Transform text fields to handle arrays and objects
       const transformText = (value: any): string | null => {
         if (!value) return null;
-        
+
         if (typeof value === 'string') return value;
         if (typeof value === 'number') return value.toString();
         if (Array.isArray(value)) return value.join(', ');
         if (typeof value === 'object') return JSON.stringify(value);
-        
+
         return null;
       };
 
@@ -886,39 +1050,39 @@ export class TransformService {
       const transformedData: Partial<Project> = {
         // ProjectId <- solutionId
         ProjectId: data.solution.solutionId,
-        
+
         // ProjectName <- projectTemplate.title
         ProjectName: data.projectTemplate.title || null,
-        
+
         // Board <- projectTemplate.metaData.board
         Board: data.projectTemplate.metaData?.board || null,
-        
+
         // Medium <- projectTemplate.metaData.medium
         Medium: data.projectTemplate.metaData?.medium || null,
-        
+
         // Subject <- projectTemplate.metaData.subject
         Subject: data.projectTemplate.metaData?.subject || null,
-        
+
         // Grade <- projectTemplate.metaData.class
         Grade: data.projectTemplate.metaData?.class || null,
-        
+
         // Type <- projectTemplate.metaData.type
         Type: data.projectTemplate.metaData?.type || null,
-        
+
         // StartDate <- program.startDate
         StartDate: parseDate(data.program?.startDate),
-        
+
         // EndDate <- program.endDate
         EndDate: parseDate(data.program?.endDate),
-        
+
         // CreatedBy <- null (as per mapping)
         CreatedBy: null,
-        
+
         // TenantId and AcademicYear are default - no need to handle
       };
 
       console.log(
-        `[TransformService] Transformed project data: ProjectId=${transformedData.ProjectId}, ProjectName=${transformedData.ProjectName}`
+        `[TransformService] Transformed project data: ProjectId=${transformedData.ProjectId}, ProjectName=${transformedData.ProjectName}`,
       );
 
       return transformedData;
@@ -937,7 +1101,10 @@ export class TransformService {
       if (!data.solution?.solutionId) {
         throw new Error('Solution ID is required for project tasks');
       }
-      if (!data.projectTemplateTasks || !Array.isArray(data.projectTemplateTasks)) {
+      if (
+        !data.projectTemplateTasks ||
+        !Array.isArray(data.projectTemplateTasks)
+      ) {
         throw new Error('Project template tasks array is required');
       }
 
@@ -965,50 +1132,52 @@ export class TransformService {
       };
 
       // Transform each task
-      const transformedTasks: Partial<ProjectTask>[] = tasks.map((task: any) => {
-        // Determine ParentId by looking up the _id of the parent task
-        let parentId: string | null = null;
-        if (task.parentTaskId) {
-          // parentTaskId contains the externalId of the parent
-          parentId = externalIdToIdMap[task.parentTaskId] || null;
-        }
+      const transformedTasks: Partial<ProjectTask>[] = tasks.map(
+        (task: any) => {
+          // Determine ParentId by looking up the _id of the parent task
+          let parentId: string | null = null;
+          if (task.parentTaskId) {
+            // parentTaskId contains the externalId of the parent
+            parentId = externalIdToIdMap[task.parentTaskId] || null;
+          }
 
-        const transformedTask: Partial<ProjectTask> = {
-          // ProjectTaskId <- task._id
-          ProjectTaskId: task._id,
-          
-          // ProjectId <- solutionId
-          ProjectId: projectId,
-          
-          // TaskName <- task.name
-          TaskName: task.name || null,
-          
-          // ParentId <- _id of the parent task (looked up via parentTaskId -> externalId mapping)
-          ParentId: parentId,
-          
-          // StartDate <- task.startDate
-          StartDate: parseDate(task.startDate),
-          
-          // EndDate <- task.endDate
-          EndDate: parseDate(task.endDate),
-          
-          // LearningResource <- task.learningResources (as JSON)
-          LearningResource: task.learningResources || null,
-          
-          // CreatedBy <- null
-          CreatedBy: null,
-          
-          // UpdatedBy <- null
-          UpdatedBy: null,
-          
-          // CreatedAt and UpdatedAt will use database defaults
-        };
+          const transformedTask: Partial<ProjectTask> = {
+            // ProjectTaskId <- task._id
+            ProjectTaskId: task._id,
 
-        return transformedTask;
-      });
+            // ProjectId <- solutionId
+            ProjectId: projectId,
+
+            // TaskName <- task.name
+            TaskName: task.name || null,
+
+            // ParentId <- _id of the parent task (looked up via parentTaskId -> externalId mapping)
+            ParentId: parentId,
+
+            // StartDate <- task.startDate
+            StartDate: parseDate(task.startDate),
+
+            // EndDate <- task.endDate
+            EndDate: parseDate(task.endDate),
+
+            // LearningResource <- task.learningResources (as JSON)
+            LearningResource: task.learningResources || null,
+
+            // CreatedBy <- null
+            CreatedBy: null,
+
+            // UpdatedBy <- null
+            UpdatedBy: null,
+
+            // CreatedAt and UpdatedAt will use database defaults
+          };
+
+          return transformedTask;
+        },
+      );
 
       console.log(
-        `[TransformService] Transformed ${transformedTasks.length} project tasks for ProjectId=${projectId}`
+        `[TransformService] Transformed ${transformedTasks.length} project tasks for ProjectId=${projectId}`,
       );
 
       return transformedTasks;
@@ -1022,7 +1191,9 @@ export class TransformService {
    * Transform project task update data from direct message to ProjectTask entity format
    * Handles both parent tasks and nested children
    */
-  async transformProjectTaskUpdateData(data: any): Promise<Partial<ProjectTask>[]> {
+  async transformProjectTaskUpdateData(
+    data: any,
+  ): Promise<Partial<ProjectTask>[]> {
     try {
       // Validate required fields
       if (!data.solutionId) {
@@ -1036,7 +1207,7 @@ export class TransformService {
       const allTasks: Partial<ProjectTask>[] = [];
 
       console.log(
-        `[TransformService] Processing project task update for ProjectId=${projectId}, total parent tasks=${data.tasks.length}`
+        `[TransformService] Processing project task update for ProjectId=${projectId}, total parent tasks=${data.tasks.length}`,
       );
 
       // Helper to safely parse dates (handles DD-MM-YYYY format)
@@ -1050,7 +1221,7 @@ export class TransformService {
               const day = parseInt(parts[0], 10);
               const month = parseInt(parts[1], 10);
               const year = parseInt(parts[2], 10);
-              
+
               // Validate the parts
               if (!isNaN(day) && !isNaN(month) && !isNaN(year)) {
                 // Create date with month-1 (JavaScript months are 0-indexed)
@@ -1059,7 +1230,7 @@ export class TransformService {
               }
             }
           }
-          
+
           // Fallback to standard Date parsing
           const parsed = new Date(dateValue);
           return isNaN(parsed.getTime()) ? null : parsed;
@@ -1073,17 +1244,17 @@ export class TransformService {
         // Skip tasks without referenceId
         if (!task.referenceId) {
           console.warn(
-            `[TransformService] Skipping task without referenceId: ${task.name || task._id}`
+            `[TransformService] Skipping task without referenceId: ${task.name || task._id}`,
           );
           continue;
         }
 
         // Extract dates from metaInformation if available, otherwise from task directly
         const startDate = parseDate(
-          task.metaInformation?.startDate || task.startDate
+          task.metaInformation?.startDate || task.startDate,
         );
         const endDate = parseDate(
-          task.metaInformation?.endDate || task.endDate
+          task.metaInformation?.endDate || task.endDate,
         );
 
         // Transform parent task
@@ -1106,17 +1277,17 @@ export class TransformService {
             // Skip children without referenceId
             if (!child.referenceId) {
               console.warn(
-                `[TransformService] Skipping child task without referenceId: ${child.name || child._id}`
+                `[TransformService] Skipping child task without referenceId: ${child.name || child._id}`,
               );
               continue;
             }
 
             // Extract dates from child's metaInformation
             const childStartDate = parseDate(
-              child.metaInformation?.startDate || child.startDate
+              child.metaInformation?.startDate || child.startDate,
             );
             const childEndDate = parseDate(
-              child.metaInformation?.endDate || child.endDate
+              child.metaInformation?.endDate || child.endDate,
             );
 
             const childTask: Partial<ProjectTask> = {
@@ -1136,7 +1307,7 @@ export class TransformService {
       }
 
       console.log(
-        `[TransformService] Transformed ${allTasks.length} tasks (including children) for ProjectId=${projectId}`
+        `[TransformService] Transformed ${allTasks.length} tasks (including children) for ProjectId=${projectId}`,
       );
 
       return allTasks;
@@ -1150,7 +1321,9 @@ export class TransformService {
    * Transform project sync data to ProjectTaskTracking records
    * Only processes tasks with status === 'completed'
    */
-  async transformProjectTaskTrackingData(data: any): Promise<Partial<ProjectTaskTracking>[]> {
+  async transformProjectTaskTrackingData(
+    data: any,
+  ): Promise<Partial<ProjectTaskTracking>[]> {
     try {
       // Validate required fields
       if (!data.solutionId) {
@@ -1165,7 +1338,7 @@ export class TransformService {
       const trackingRecords: Partial<ProjectTaskTracking>[] = [];
 
       console.log(
-        `[TransformService] Processing project task tracking for ProjectId=${projectId}, total tasks=${data.tasks.length}`
+        `[TransformService] Processing project task tracking for ProjectId=${projectId}, total tasks=${data.tasks.length}`,
       );
 
       // Iterate through each task
@@ -1184,14 +1357,17 @@ export class TransformService {
           trackingRecords.push(trackingRecord);
 
           console.log(
-            `[TransformService] Added parent task: ${task.name} (referenceId=${task.referenceId})`
+            `[TransformService] Added parent task: ${task.name} (referenceId=${task.referenceId})`,
           );
         }
 
         // Check children tasks if they exist
         if (task.children && Array.isArray(task.children)) {
           for (const child of task.children) {
-            if (child.status?.toLowerCase() === 'completed' && child.referenceId) {
+            if (
+              child.status?.toLowerCase() === 'completed' &&
+              child.referenceId
+            ) {
               const childTrackingRecord: Partial<ProjectTaskTracking> = {
                 ProjectTaskTrackingId: uuidv4(), // Generate unique ID
                 ProjectId: projectId,
@@ -1204,7 +1380,7 @@ export class TransformService {
               trackingRecords.push(childTrackingRecord);
 
               console.log(
-                `[TransformService] Added child task: ${child.name} (referenceId=${child.referenceId})`
+                `[TransformService] Added child task: ${child.name} (referenceId=${child.referenceId})`,
               );
             }
           }
@@ -1212,7 +1388,7 @@ export class TransformService {
       }
 
       console.log(
-        `[TransformService] Transformed ${trackingRecords.length} completed task tracking records for ProjectId=${projectId}`
+        `[TransformService] Transformed ${trackingRecords.length} completed task tracking records for ProjectId=${projectId}`,
       );
 
       return trackingRecords;
@@ -1221,5 +1397,4 @@ export class TransformService {
       throw error;
     }
   }
-
 }

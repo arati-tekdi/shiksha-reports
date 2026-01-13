@@ -37,7 +37,7 @@ export class User {
   status?: boolean;
 
   @Column({ name: 'UserStateID', type: 'varchar', length: 50, nullable: true })
-  stateId?: string;
+  userStateId?: string;
 
   @Column({
     name: 'UserDistrictID',
@@ -45,10 +45,10 @@ export class User {
     length: 50,
     nullable: true,
   })
-  districtId?: string;
+  userDistrictId?: string;
 
   @Column({ name: 'UserBlockID', type: 'varchar', length: 50, nullable: true })
-  blockId?: string;
+  userBlockId?: string;
 
   @Column({
     name: 'UserVillageID',
@@ -56,7 +56,7 @@ export class User {
     length: 50,
     nullable: true,
   })
-  villageId?: string;
+  userVillageId?: string;
 
   @Column({
     name: 'UserPreferredModeOfLearning',
@@ -64,7 +64,7 @@ export class User {
     length: 100,
     nullable: true,
   })
-  preferredModeOfLearning?: string;
+  userPreferredModeOfLearning?: string;
 
   @Column({
     name: 'UserMotherName',
@@ -238,7 +238,7 @@ export class User {
     nullable: true,
   })
   userNumOfChildrenWorkingWith?: string;
-  
+
   @Column({
     name: 'JobFamily',
     type: 'varchar',
@@ -269,10 +269,15 @@ export class User {
   @Column({ name: 'ERPUserID', type: 'text', nullable: true })
   erpUserId?: string;
 
-  @Column({ name: 'IsManager', type: 'boolean', nullable: true, default: false })
+  @Column({
+    name: 'IsManager',
+    type: 'boolean',
+    nullable: true,
+    default: false,
+  })
   isManager?: boolean;
 
-  @Column({ name: 'UserLastLogin', type: "timestamptz", nullable: true })
+  @Column({ name: 'UserLastLogin', type: 'timestamptz', nullable: true })
   userLastLogin?: Date;
 
   @Column({ name: 'UserCustomField', type: 'jsonb', nullable: true })
@@ -302,9 +307,6 @@ export class User {
   @Column({ name: 'UserRole', type: 'text', nullable: true })
   userRole?: string;
 
-  @Column({ name: 'UserVillageId', type: 'text', nullable: true })
-  userVillageId?: string;
-
   @Column({ name: 'UserClusterId', type: 'text', nullable: true })
   userClusterId?: string;
 
@@ -319,5 +321,4 @@ export class User {
 
   @Column({ name: 'UserDepartment', type: 'text', nullable: true })
   userDepartment?: string;
-
 }
