@@ -121,7 +121,7 @@ export class TransformService {
         userId: data.userId,
         username: data.username,
         fullName:
-          `${data.firstName || ''} ${data.middleName ? data.middleName + ' ' : ''}${data.lastName || ''}`.trim(),
+          `${data.firstName || ''} ${data.middleName ? data.middleName + ' ' : ''}${data.lastName || ''}`.trim() || undefined,
         email: data.email,
         mobile: data.mobile?.toString(),
         dob: data.dob,
@@ -184,7 +184,7 @@ export class TransformService {
         psu: extractCustomField('PSU'),
         groupMembership: extractCustomField('EMP_GROUP'),
       };
-
+      console.log(transformedData,"");
       return transformedData;
     } catch (error) {
       console.error('Error transforming user data:', error);
@@ -662,9 +662,71 @@ export class TransformService {
   /**
    * Transform external question set data to QuestionSet entity format
    */
-  async transformQuestionSetData(
-    data: ExternalQuestionSetData,
-  ): Promise<Partial<QuestionSet>> {
+  // async transformQuestionSetData(data: ExternalQuestionSetData): Promise<Partial<QuestionSet>> {
+  //   try {
+  //     // Validate required fields
+  //     if (!data.identifier) {
+  //       throw new Error('QuestionSet identifier is required');
+  //     }
+
+  //     // Transform date fields
+  //     const transformDate = (dateValue: string | Date | null | undefined): Date | null => {
+  //       if (!dateValue) return null;
+        
+  //       if (typeof dateValue === 'string') {
+  //         const parsed = new Date(dateValue);
+  //         return isNaN(parsed.getTime()) ? null : parsed;
+  //       }
+        
+  //       if (dateValue instanceof Date) {
+  //         return isNaN(dateValue.getTime()) ? null : dateValue;
+  //       }
+        
+  //       return null;
+  //     };
+
+  //     // Transform text fields to handle arrays and objects
+  //     const transformText = (value: any): string | null => {
+  //       if (!value) return null;
+        
+  //       if (typeof value === 'string') return value;
+  //       if (typeof value === 'number') return value.toString();
+  //       if (Array.isArray(value)) return value.join(', ');
+  //       if (typeof value === 'object') return JSON.stringify(value);
+        
+  //       return null;
+  //     };
+
+  //     // Handle different field name variations from API
+  //     const getFieldValue = (primaryField: any, alternativeField?: any): any => {
+  //       return primaryField || alternativeField || null;
+  //     };
+
+  //     const transformedData: Partial<QuestionSet> = {
+  //       identifier: data.identifier,
+  //       name: data.name || null,
+  //       childNodes: transformText(getFieldValue(data.childNodes)),
+  //       createdOn: transformDate(getFieldValue(data.createdOn)),
+  //       program: transformText(getFieldValue(data.program)),
+  //       assessmentType: data.assessmentType || null,
+  //       contentLanguage: transformText(getFieldValue(data.contentLanguage, data.language)),
+  //     };
+
+  //     return transformedData;
+  //   } catch (error) {
+  //     console.error('Error transforming question set data:', error, {
+  //       identifier: data.identifier,
+  //       error: error.message,
+  //     });
+  //     throw error;
+  //   }
+  // }
+
+  // ...existing code...
+  /**
+   * Transform external question set data to QuestionSet entity format
+   */
+  async transformQuestionSetData(data: ExternalQuestionSetData): Promise<Partial<QuestionSet>> {
     try {
       // Validate required fields
       if (!data.identifier) {
@@ -691,7 +753,7 @@ export class TransformService {
 
       // Transform text fields to handle arrays and objects
       const transformText = (value: any): string | null => {
-        if (!value) return null;
+        if (value === undefined || value === null) return null;
 
         if (typeof value === 'string') return value;
         if (typeof value === 'number') return value.toString();
@@ -702,34 +764,32 @@ export class TransformService {
       };
 
       // Handle different field name variations from API
-      const getFieldValue = (
-        primaryField: any,
-        alternativeField?: any,
-      ): any => {
-        return primaryField || alternativeField || null;
+      const getFieldValue = (primaryField: any, alternativeField?: any): any => {
+        return primaryField ?? alternativeField ?? null;
       };
 
-      const transformedData: Partial<QuestionSet> = {
+      const transformedData = {
         identifier: data.identifier,
         name: data.name || null,
         childNodes: transformText(getFieldValue(data.childNodes)),
         createdOn: transformDate(getFieldValue(data.createdOn)),
         program: transformText(getFieldValue(data.program)),
         assessmentType: data.assessmentType || null,
-        contentLanguage: transformText(
-          getFieldValue(data.contentLanguage, data.language),
-        ),
+        contentLanguage: transformText(getFieldValue(data.contentLanguage, data.language)),
+        // Added status mapping (supports variations like data.status or data.workflowStatus)
+        status: data.status,
       };
 
       return transformedData;
     } catch (error) {
       console.error('Error transforming question set data:', error, {
-        identifier: data.identifier,
+        identifier: (data && (data as any).identifier) || undefined,
         error: error.message,
       });
       throw error;
     }
   }
+// ...existing code...
 
   /**
    * Transform external content data to Content entity format
