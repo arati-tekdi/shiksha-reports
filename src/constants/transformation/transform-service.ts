@@ -116,6 +116,17 @@ export class TransformService {
         return status.toLowerCase() === 'active';
       };
 
+      // Helper function to convert string to Date
+      const convertToDate = (value: string | null) => {
+        if (!value) return null;
+        try {
+          const date = new Date(value);
+          return isNaN(date.getTime()) ? null : date;
+        } catch {
+          return null;
+        }
+      };
+
       const transformedData: Partial<User> & Record<string, any> = {
         // Basic user fields - mapping to entity property names (not column names)
         userId: data.userId,
@@ -131,7 +142,8 @@ export class TransformService {
         updatedAt: data.updatedAt ? new Date(data.updatedAt) : undefined,
 
         // Add enrollmentId from main data
-        userEnrollmentNumber: data.enrollmentId,
+        // same key in shiksha
+        //userEnrollmentNumber: data.enrollmentId,
 
         // Location fields from custom fields
         stateId: extractCustomField('STATE'),
@@ -140,21 +152,29 @@ export class TransformService {
         villageId: extractCustomField('VILLAGE'),
 
         // Additional custom fields mapped to entity properties
-        userFatherName: extractCustomField('FATHER_NAME'),
+        // same key in shiksha
+        //userFatherName: extractCustomField('FATHER_NAME'),
         userGuardianName: extractCustomField('NAME_OF_GUARDIAN'),
-        userGuardianRelation: extractCustomField('RELATION_WITH_GUARDIAN'),
-        userParentPhone: extractCustomField('PARENT_GUARDIAN_PHONE_NO'),
-        userClass: extractCustomField(
-          'HIGHEST_EDCATIONAL_QUALIFICATION_OR_LAST_PASSED_GRADE',
-        ),
-        userMaritalStatus: extractCustomField('MARITAL_STATUS'),
-        userWhatDoYouWantToBecome: extractCustomField(
-          'WHAT_DO_YOU_WANT_TO_BECOME',
-        ),
-        userDropOutReason: extractCustomField(
-          'REASON_FOR_DROP_OUT_FROM_SCHOOL',
-        ),
-        userWorkDomain: extractCustomField('WHAT_IS_YOUR_PRIMARY_WORK'),
+        // same key in shiksha
+        //userGuardianRelation: extractCustomField('RELATION_WITH_GUARDIAN'),
+        // same key in shiksha
+        //userParentPhone: extractCustomField('PARENT_GUARDIAN_PHONE_NO'),
+        // same key in shiksha
+        //userClass: extractCustomField(
+        //  'HIGHEST_EDCATIONAL_QUALIFICATION_OR_LAST_PASSED_GRADE',
+        //),
+        // same key in shiksha
+        //userMaritalStatus: extractCustomField('MARITAL_STATUS'),
+        // same key in shiksha
+        //userWhatDoYouWantToBecome: extractCustomField(
+        //  'WHAT_DO_YOU_WANT_TO_BECOME',
+        //),
+        // same key in shiksha
+        //userDropOutReason: extractCustomField(
+        //  'REASON_FOR_DROP_OUT_FROM_SCHOOL',
+        //),
+        // same key in shiksha
+        //userWorkDomain: extractCustomField('WHAT_IS_YOUR_PRIMARY_WORK'),
         preferredModeOfLearning: extractCustomField(
           'WHAT_IS_YOUR_PREFERRED_MODE_OF_LEARNING',
         ),
@@ -165,9 +185,10 @@ export class TransformService {
         familyMemberDetails: extractCustomField('FAMILY_MEMBER_DETAILS'),
 
         // Boolean fields
-        userOwnPhoneCheck: convertToBoolean(
-          extractCustomField('DOES_THIS_PHONE_BELONG_TO_YOU'),
-        ),
+        // same key in shiksha
+        //userOwnPhoneCheck: convertToBoolean(
+        //  extractCustomField('DOES_THIS_PHONE_BELONG_TO_YOU'),
+        //),
 
         // ERP and Manager fields (extracted by fieldId)
         erpUserId: extractCustomFieldById(
@@ -182,7 +203,150 @@ export class TransformService {
         // JobFamily, PSU, GroupMembership mapped to proper columns
         jobFamily: extractCustomField('JOB_FAMILY'),
         psu: extractCustomField('PSU'),
-        groupMembership: extractCustomField('EMP_GROUP'),
+        // same key in shiksha
+        //groupMembership: extractCustomField('EMP_GROUP'),
+
+        // Additional fields extracted by fieldId for shiksha
+        userPreferredModeOfLearning: extractCustomFieldById(
+          '7b43db0a-f4c3-4c77-919f-622509ca7add',
+        ),
+        userWorkDomain: extractCustomFieldById(
+          '2914814c-2a0f-4422-aff8-6bd3b09d3069',
+        ),
+        userSpouseName: extractCustomFieldById(
+          '0dd4cf0b-b774-439a-9997-5437cd78bfcd',
+        ),
+        userWhatDoYouWantToBecome: extractCustomFieldById(
+          'a8d3d878-9b92-4231-b25c-b22726985238',
+        ),
+        userClass: extractCustomFieldById(
+          '9a4ad601-023b-467f-bbbe-bda1885f87c7',
+        ),
+        userPreferredLanguage: extractCustomFieldById(
+          '4b9d798d-e8f2-4ae5-b177-a57655aa5d1c',
+        ),
+        userParentPhone: extractCustomFieldById(
+          '7ecaa845-901a-4ac7-a136-eed087f3b85b',
+        ),
+        userGuardianRelation: extractCustomFieldById(
+          '3a7bf305-6bac-4377-bf09-f38af866105c',
+        ),
+        userSubjectTaught: extractCustomFieldById(
+          'abb7f3fe-f7fa-47be-9d28-5747dd3159f2',
+        ),
+        userMaritalStatus: extractCustomFieldById(
+          'ff472647-6c40-42e6-b200-dc74b241e915',
+        ),
+        userGrade: extractCustomFieldById(
+          '5a2dbb89-bbe6-4aa8-b541-93e01ab07b70',
+        ),
+        userTrainingCheck: convertToBoolean(
+          extractCustomFieldById('0be5a8c6-92e9-4b7c-ac01-345131b06118'),
+        ),
+        userDropOutReason: extractCustomFieldById(
+          '4f48571b-88fd-43b9-acb3-91afda7901ac',
+        ),
+        userOwnPhoneCheck: convertToBoolean(
+          extractCustomFieldById('d119d92f-fab7-4c7d-8370-8b40b5ed23dc'),
+        ),
+        userEnrollmentNumber: extractCustomFieldById(
+          'e2f1fcbc-a76a-4b51-a092-ae4823bc45fd',
+        ),
+        userDesignation: extractCustomFieldById(
+          '4fc098c5-bec5-4afc-a15d-093805b05119',
+        ),
+        userBoard: extractCustomFieldById(
+          'f93c0ac3-f827-4794-9457-441fa1057b42',
+        ),
+        userSubject: extractCustomFieldById(
+          '69a9dba2-e05e-40cd-a39c-047b9b676b5c',
+        ),
+        userMainSubject: extractCustomFieldById(
+          '935bfb34-9be7-4676-b9cc-cec1ec4c0a2c',
+        ),
+        userMedium: extractCustomFieldById(
+          '7b214a17-5a07-4ee0-bedc-271429862d30',
+        ),
+        userPhoneType: extractCustomFieldById(
+          'da594b2e-c645-4a96-af15-6e2d24587c9a',
+        ),
+        userNumOfChildrenWorkingWith: extractCustomFieldById(
+          'a4c2dace-e052-4e78-b6ad-9ffcc035c578',
+        ),
+        groupMembership: extractCustomFieldById(
+          '29c36dd1-315c-46d9-bf6a-f1858ae71c33',
+        ),
+        userFatherName: extractCustomFieldById(
+          '679f4a27-09f9-4f78-85a0-9fe8bfd3ef18',
+        ),
+        userMotherName: extractCustomFieldById(
+          'd3644b9e-e9df-4f08-ae7b-1a6b4413fedf',
+        ),
+        userAccessToWhatsApp: extractCustomFieldById(
+          '53a44ba9-c8ed-43db-9fee-c2c81ae707b9',
+        ),
+        userProgram: extractCustomFieldById(
+          '5fce49b6-cd23-44f5-b87b-4ae0cbe2e328',
+        ),
+        userGender: extractCustomFieldById(
+          '08ab0a4e-4a72-498b-ad43-38fcb5e47586',
+        ),
+        userDateOfJoining: convertToDate(
+          extractCustomFieldById('cec6c953-71b6-4c53-98b8-582aaa6008b5'),
+        ),
+        userTeacherID: extractCustomFieldById(
+          'f9f17574-4227-4ba3-a485-f8b1269ff086',
+        ),
+        userCEFRLevel: extractCustomFieldById(
+          'e2395f11-a53d-4fb6-ab89-eae6367156f5',
+        ),
+        userSubprograms: extractCustomFieldById(
+          '074643e8-8d53-4f14-956b-f7d0216f63e7',
+        ),
+        userOldTeacherID: extractCustomFieldById(
+          '434fcadb-8508-42a9-bbed-03be19e8dfdb',
+        ),
+        userRole: extractCustomFieldById(
+          '4e4864d3-7049-49d0-b52a-4c9fbe7774b8',
+        ),
+        userVillageId: extractCustomFieldById(
+          'e4de6f2a-f4b3-4f66-b1be-fcbe8ff607d3',
+        ) || extractCustomFieldById(
+          '5cfacade-9d56-4a1e-b4e9-cc8e8c6b04c5',
+        ) || extractCustomFieldById(
+          '2f7e6930-0bc2-4e69-8bd4-dde205fa5471',
+        ),
+        userClusterId: extractCustomFieldById(
+          'c3357b23-1394-48a9-afc5-7589873365ae',
+        ),
+        userSupervisors: extractCustomFieldById(
+          '26c55f7f-c691-440d-8c7f-88480c72f07b',
+        ),
+        
+        userDistrictId: extractCustomFieldById(
+          'd4ad6f2a-f4b3-4f66-b1be-fcbe8ff607f3',
+        ) || extractCustomFieldById(
+          '62340eaa-40fb-48b9-ba90-dcaa78be778e',
+        ),
+        userStateId: extractCustomFieldById(
+          '800265b1-9058-482a-94f4-726197e1dfe4',
+        ) ||  extractCustomFieldById(
+          'b4ad6f2a-f4b3-4f66-b1be-fcbe8ff607e3',
+        ),
+        userBlockId: extractCustomFieldById(
+          '1e3e76e2-7f77-4fd7-a79f-abe5c33d4d08',
+        ) || extractCustomFieldById(
+          'e4bc6f2a-f4b3-4f66-b1be-fcbe8ff607f3',
+        ),
+        userDateOfLeaving: convertToDate(
+          extractCustomFieldById('4fa37e71-bbd6-4dd1-9523-510edf63afb7'),
+        ),
+        userReasonForLeaving: extractCustomFieldById(
+          '11fe3a6b-3b32-43e4-bc50-1fc72bf5dd54',
+        ),
+        userDepartment: extractCustomFieldById(
+          '0d501559-3bb2-44ed-8e33-850f6ed22666',
+        ),
       };
       console.log(transformedData,"");
       return transformedData;
@@ -327,7 +491,7 @@ export class TransformService {
         }
       }
 
-      const transformedData: Partial<Cohort> = {
+      const transformedData: Partial<Cohort> & Record<string, any> = {
         cohortId: data.cohortId,
         tenantId: data.tenantId,
         cohortName: data.name,
@@ -337,20 +501,84 @@ export class TransformService {
         status: data.status,
 
         // Location fields from custom fields
-        coStateId: extractCustomField('STATE'),
-        coDistrictId: extractCustomField('DISTRICT'),
-        coBlockId: extractCustomField('BLOCK'),
-        coVillageId: extractCustomField('VILLAGE'),
+        // same key in shiksha
+        //coStateId: extractCustomField('STATE'),
+        // same key in shiksha
+        //coDistrictId: extractCustomField('DISTRICT'),
+        // same key in shiksha
+        //coBlockId: extractCustomField('BLOCK'),
+        // same key in shiksha
+        //coVillageId: extractCustomField('VILLAGE'),
 
         // Educational fields
-        coBoard: extractCustomField('BOARD'),
-        coGrade: extractCustomField('GRADE'),
-        coMedium: extractCustomField('MEDIUM'),
-        coSubject: extractCustomField('SUBJECT'),
+        // same key in shiksha
+        //coBoard: extractCustomField('BOARD'),
+        // same key in shiksha
+        //coGrade: extractCustomField('GRADE'),
+        // same key in shiksha
+        //coMedium: extractCustomField('MEDIUM'),
+        // same key in shiksha
+        //coSubject: extractCustomField('SUBJECT'),
 
         // Additional fields
-        coGoogleMapLink: extractCustomField('GOOGLE_MAP_LINK'),
-        coIndustry: extractCustomField('INDUSTRY'),
+        // same key in shiksha
+        //coGoogleMapLink: extractCustomField('GOOGLE_MAP_LINK'),
+        // same key in shiksha
+        //coIndustry: extractCustomField('INDUSTRY'),
+
+        // Additional fields extracted by fieldId for shiksha
+        coBoard: extractCustomFieldById('f93c0ac3-f827-4794-9457-441fa1057b42'),
+        coSubject: extractCustomFieldById(
+          '69a9dba2-e05e-40cd-a39c-047b9b676b5c',
+        ),
+        coGrade: extractCustomFieldById('5a2dbb89-bbe6-4aa8-b541-93e01ab07b70'),
+        coMedium: extractCustomFieldById(
+          '7b214a17-5a07-4ee0-bedc-271429862d30',
+        ),
+        coIndustry: extractCustomFieldById(
+          'e5277d7b-e7ef-4a11-9a54-a8e6e7975383',
+        ),
+        coGoogleMapLink: extractCustomFieldById(
+          'e9f8acbb-b10d-4b46-9584-f5ec453c250e',
+        ),
+        coProgram: extractCustomFieldById(
+          '5fce49b6-cd23-44f5-b87b-4ae0cbe2e328',
+        ),
+        coCluster: extractCustomFieldById(
+          'c3357b23-1394-48a9-afc5-7589873365ae',
+        ),
+        coLongitude: extractCustomFieldById(
+          'fe466e4e-193b-4d01-863d-cf861d8d5bf5',
+        ),
+        coLatitude: extractCustomFieldById(
+          'fd466e4e-193b-4d01-863d-cf861d8d5bf4',
+        ),
+        coSchoolType: extractCustomFieldById(
+          'c4ad6f2a-f4b3-4f66-b1be-fcbe8ff607e3',
+        ),
+        // Multiple field IDs mapping to same location columns - using first occurrence
+        coDistrictId: extractCustomFieldById(
+          'd4ad6f2a-f4b3-4f66-b1be-fcbe8ff607f3',
+        ) || extractCustomFieldById(
+          '62340eaa-40fb-48b9-ba90-dcaa78be778e',
+        ),
+        coStateId: extractCustomFieldById(
+          'b4ad6f2a-f4b3-4f66-b1be-fcbe8ff607e3',
+        ) || extractCustomFieldById(
+          '800265b1-9058-482a-94f4-726197e1dfe4',
+        ),
+        coBlockId: extractCustomFieldById(
+          '1e3e76e2-7f77-4fd7-a79f-abe5c33d4d08',
+        ) || extractCustomFieldById(
+          'e4bc6f2a-f4b3-4f66-b1be-fcbe8ff607f3',
+        ),
+        coVillageId: extractCustomFieldById(
+          'e4de6f2a-f4b3-4f66-b1be-fcbe8ff607d3',
+        ) || extractCustomFieldById(
+          '5cfacade-9d56-4a1e-b4e9-cc8e8c6b04c5',
+        ) || extractCustomFieldById(
+          '2f7e6930-0bc2-4e69-8bd4-dde205fa5471',
+        ),
       };
 
       console.log(

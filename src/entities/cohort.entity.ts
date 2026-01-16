@@ -55,6 +55,37 @@ export class Cohort {
   @Column({ name: 'CoGoogleMapLink', type: 'text', nullable: true })
   coGoogleMapLink?: string;
 
-  @Column({ name: 'Status', type: 'text', nullable: true })
+  @Column({ name: 'Status', type: 'text', nullable: true, default: 'active' })
   status?: string;
+
+  @Column({
+    name: 'createdAt',
+    type: 'timestamptz',
+    nullable: false,
+    default: () => 'now()',
+  })
+  createdAt: Date;
+
+  @Column({
+    name: 'updatedAt',
+    type: 'timestamptz',
+    nullable: false,
+    default: () => 'now()',
+  })
+  updatedAt: Date;
+
+  @Column({ name: 'CoProgram', type: 'text', nullable: true })
+  coProgram?: string;
+
+  @Column({ name: 'CoCluster', type: 'text', nullable: true })
+  coCluster?: string;
+
+  @Column({ name: 'CoLongitude', type: 'text', nullable: true })
+  coLongitude?: string;
+
+  @Column({ name: 'CoLatitude', type: 'text', nullable: true })
+  coLatitude?: string;
+
+  @Column({ name: 'CoSchoolType', type: 'text', nullable: true })
+  coSchoolType?: string;
 }
