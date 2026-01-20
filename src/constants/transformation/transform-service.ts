@@ -194,9 +194,9 @@ export class TransformService {
         erpUserId: extractCustomFieldById(
           '93de5cc5-9437-4ca7-95f3-3b2f31b24093',
         ),
-        isManager: extractCustomFieldById(
+        isManager: convertToBoolean(extractCustomFieldById(
           '8e8ab9b7-8ce0-4e6e-bf7e-0477a80734c8',
-        ),
+        ),),
         empManager: extractCustomFieldById(
           '27589b6d-6ece-457a-8d50-d15a3db02bf6',
         ),
