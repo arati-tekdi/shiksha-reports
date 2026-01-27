@@ -610,6 +610,19 @@ export class TransformService {
 
       // Format day as two-digit string for column mapping
       const dayColumn = `day${day.toString().padStart(2, '0')}`;
+  const istFormatter = new Intl.DateTimeFormat('en-GB', {
+  timeZone: 'Asia/Kolkata',
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+  hour: '2-digit',
+  minute: '2-digit',
+  second: '2-digit',
+  fractionalSecondDigits: 3, // milliseconds
+  hour12: false
+});
+
+const parts = istFormatter.formatToParts(new Date());
 
       const dayAttendance = {
         scope: data.scope,
@@ -620,7 +633,10 @@ export class TransformService {
         attendance: data.attendance,
         absentReason: data.absentReason,
         validLocation: data.validLocation,
+       timestamp :`${parts.find(p => p.type === 'year').value}-${parts.find(p => p.type === 'month').value}-${parts.find(p => p.type === 'day').value} ` +
+                  `${parts.find(p => p.type === 'hour').value}:${parts.find(p => p.type === 'minute').value}:${parts.find(p => p.type === 'second').value}.${parts.find(p => p.type === 'fractionalSecond').value}`,
         ...data.metaData,
+
       };
 
       const transformedData: Partial<AttendanceTracker> = {
