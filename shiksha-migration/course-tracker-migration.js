@@ -68,12 +68,7 @@ async function migrateCourseTracker() {
       FROM public.user_course_certificate ucc
       WHERE ucc."userId" IS NOT NULL 
         AND ucc."tenantId" IS NOT NULL
-        AND ucc."courseId" IS NOT NULL
-        AND ucc."usercertificateId" IN (
-        'a7a06a09-2d44-4cd3-9d9d-fae32b96016c',
-        '032bd524-167f-4082-a00d-d3ab48c569bb'
-        )
-    `;
+        AND ucc."courseId" IS NOT NULL`;
 
     const res = await sourceClient.query(query);
     console.log(`[COURSE TRACKER] Found ${res.rows.length} candidate rows.`);

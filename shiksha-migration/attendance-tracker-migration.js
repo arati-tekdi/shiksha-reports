@@ -43,11 +43,13 @@ async function migrateAttendanceTracker() {
         a."lateMark",
         a."absentReason",
         a."validLocation",
-        a."metaData"
+        a."metaData",
+        a."updatedAt"
       FROM public."Attendance" a
-      WHERE a."attendanceDate" IS NOT NULL 
+      WHERE a."attendanceDate" IS NOT NULL
         AND a."userId" IS NOT NULL
-    `);
+        AND a."attendanceDate" BETWEEN  '2025-12-30' AND '2026-01-27'`);
+    
     const queryDuration = Date.now() - queryStartTime;
     console.log(`[ATND] ✓ Fetched ${res.rows.length} rows in ${queryDuration}ms`);
 
@@ -88,17 +90,31 @@ async function migrateAttendanceTracker() {
           metaDataObj = {};
         }
       }
+      const istFormatter = new Intl.DateTimeFormat('en-GB', {
+        timeZone: 'Asia/Kolkata',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        fractionalSecondDigits: 3, // milliseconds
+        hour12: false
+      });
       
+      const parts = istFormatter.formatToParts(r.updatedAt);
       // Create main object with all fields, spreading metaData
       const attendanceData = {
-        attendance: r.attendance || null,
-        remark: r.remark || null,
-        latitude: r.latitude || null,
-        longitude: r.longitude || null,
-        scope: r.scope || null,
-        lateMark: r.lateMark || null,
-        absentReason: r.absentReason || null,
-        validLocation: r.validLocation || null,
+        attendance: r.attendance ?? null,
+        remark: r.remark ?? null,
+        latitude: r.latitude ?? null,
+        longitude: r.longitude ?? null,
+        scope: r.scope ?? null,
+        lateMark: r.lateMark ,
+        absentReason: r.absentReason ?? null,
+        validLocation: r.validLocation ?? null,
+        timestamp :`${parts.find(p => p.type === 'year').value}-${parts.find(p => p.type === 'month').value}-${parts.find(p => p.type === 'day').value} ` +
+                  `${parts.find(p => p.type === 'hour').value}:${parts.find(p => p.type === 'minute').value}:${parts.find(p => p.type === 'second').value}.${parts.find(p => p.type === 'fractionalSecond').value}`,
         ...metaDataObj  // Spread metaData keys into main object
       };
       

@@ -135,7 +135,6 @@ async function migrateAssessmentTracker() {
         "timeSpent",
         "attemptId"
       FROM public.assessment_tracking
-      WHERE DATE("createdOn") = '2025-09-29'
     `);
     console.log(`[ASSESSMENT TRACKER] Found ${assessmentsRes.rows.length} assessment rows.`);
 

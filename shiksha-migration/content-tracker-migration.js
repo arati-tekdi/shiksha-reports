@@ -5,7 +5,7 @@ const dbConfig = require('./db');
 console.log('=== Loading content-tracker-migration.js ===');
 
 const BATCH_SIZE = 100; // Process 100 records at a time
-const START_FROM_BATCH = 102; // Start from batch 103 (skipping first 102 batches)
+const START_FROM_BATCH = 1; // Start from batch 103 (skipping first 102 batches)
 const contentNameCache = new Map();
 const userTenantCache = new Map();
 
@@ -30,7 +30,8 @@ async function fetchContentNames(contentIds) {
   // Helper function to fetch single content with retry
   async function fetchContentWithRetry(contentId, retryCount = 0) {
     try {
-      const url = `https://interface.prathamdigital.org/interface/v1/api/content/v1/read/${contentId}?fields=name`;
+      //const url = `https://interface.prathamdigital.org/interface/v1/api/content/v1/read/${contentId}?fields=name`;
+      const url = `${process.env.MIDDLEWARE_SERVICE_BASE_URL}api/content/v1/read/${contentId}?fields=name`;
       const res = await axios.get(url, { 
         headers,
         timeout: 5000, // 5 second timeout

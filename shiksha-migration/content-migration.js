@@ -1,10 +1,17 @@
+require('dotenv').config();
 const { Client } = require('pg');
 const axios = require('axios');
 const dbConfig = require('./db');
 
 console.log('=== Loading api-migration.js ===');
 
-const API_URL = 'https://interface.prathamdigital.org/interface/v1/action/composite/v3/search';
+//const API_URL = 'https://interface.prathamdigital.org/interface/v1/action/composite/v3/search';
+const MIDDLEWARE_BASE_URL = process.env.MIDDLEWARE_SERVICE_BASE_URL;
+if (!MIDDLEWARE_BASE_URL) {
+  console.error('❌ ERROR: MIDDLEWARE_SERVICE_BASE_URL environment variable is not set!');
+  process.exit(1);
+}
+const API_URL = `${MIDDLEWARE_BASE_URL}action/composite/v3/search`;
 const LIMIT = 1000;
 
 // Define which fields should be stored as arrays
@@ -23,8 +30,8 @@ const ARRAY_FIELDS = [
 async function fetchDataFromAPI(offset = 0) {
   const headers = {
     'Content-Type': 'application/json',
-    'User-Agent': 'Shiksha-Reports-Cron/1.0',
-    'Cookie': 'AWSALB=AexPo8Pmp6oMCH3rjxzJLf4yo+LvQLlq+eal+Hr8XngG57iNuDahB+T7tcxcrBvMa6eURBlRJjjG9vrRIYdF++asDMxFA95NkXfwLSL5YYfwo3heTwT8xiE3Byb2; AWSALBCORS=AexPo8Pmp6oMCH3rjxzJLf4yo+LvQLlq+eal+Hr8XngG57iNuDahB+T7tcxcrBvMa6eURBlRJjjG9vrRIYdF++asDMxFA95NkXfwLSL5YYfwo3heTwT8xiE3Byb2'
+    //'User-Agent': 'Shiksha-Reports-Cron/1.0',
+    //'Cookie': 'AWSALB=AexPo8Pmp6oMCH3rjxzJLf4yo+LvQLlq+eal+Hr8XngG57iNuDahB+T7tcxcrBvMa6eURBlRJjjG9vrRIYdF++asDMxFA95NkXfwLSL5YYfwo3heTwT8xiE3Byb2; AWSALBCORS=AexPo8Pmp6oMCH3rjxzJLf4yo+LvQLlq+eal+Hr8XngG57iNuDahB+T7tcxcrBvMa6eURBlRJjjG9vrRIYdF++asDMxFA95NkXfwLSL5YYfwo3heTwT8xiE3Byb2'
   };
 
   const payload = {
@@ -48,7 +55,7 @@ async function fetchDataFromAPI(offset = 0) {
   const res = await axios.post(API_URL, payload, { headers });
   return res.data;
 }
-
+ 
 // Process field value - convert arrays to JSON strings for text columns
 function processFieldValue(fieldName, value) {
   // If the field should be an array
@@ -81,7 +88,7 @@ async function insertDataToDatabase(destClient, data) {
     const insertQuery = `
       INSERT INTO public."Content"(
         "identifier", "name", "author", "primaryCategory", "channel", "status",
-        "contentType", "contentLanguage", "se_domains", "se_subdomains", "se_subjects",
+        "contentType", "contentLanguage", "domains", "subdomains", "subjects",
         "targetAgeGroup", "audience", "program", "keywords", "description",
         "createdBy", "lastPublishedOn", "createdOn"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
@@ -93,9 +100,9 @@ async function insertDataToDatabase(destClient, data) {
         "status" = EXCLUDED."status",
         "contentType" = EXCLUDED."contentType",
         "contentLanguage" = EXCLUDED."contentLanguage",
-        "se_domains" = EXCLUDED."se_domains",
-        "se_subdomains" = EXCLUDED."se_subdomains",
-        "se_subjects" = EXCLUDED."se_subjects",
+        "domains" = EXCLUDED."domains",
+        "subdomains" = EXCLUDED."subdomains",
+        "subjects" = EXCLUDED."subjects",
         "targetAgeGroup" = EXCLUDED."targetAgeGroup",
         "audience" = EXCLUDED."audience",
         "program" = EXCLUDED."program",
