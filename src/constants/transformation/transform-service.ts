@@ -97,6 +97,24 @@ export class TransformService {
           typeof selectedValue === 'object' &&
           selectedValue !== null
         ) {
+          // Field IDs that should return selectedValue.id
+          const idOnlyFields = [
+            'e4de6f2a-f4b3-4f66-b1be-fcbe8ff607d3', // userVillageId
+            '5cfacade-9d56-4a1e-b4e9-cc8e8c6b04c5', // userVillageId
+            '2f7e6930-0bc2-4e69-8bd4-dde205fa5471', // userVillageId
+            'c3357b23-1394-48a9-afc5-7589873365ae', // userClusterId
+            'd4ad6f2a-f4b3-4f66-b1be-fcbe8ff607f3', // userDistrictId
+            '62340eaa-40fb-48b9-ba90-dcaa78be778e', // userDistrictId
+            '800265b1-9058-482a-94f4-726197e1dfe4', // userStateId
+            'b4ad6f2a-f4b3-4f66-b1be-fcbe8ff607e3', // userStateId
+            '1e3e76e2-7f77-4fd7-a79f-abe5c33d4d08', // userBlockId
+            'e4bc6f2a-f4b3-4f66-b1be-fcbe8ff607f3', // userBlockId
+          ];
+
+          // Return 'id' for specific fields, otherwise 'value' or 'id'
+          if (idOnlyFields.includes(fieldId)) {
+            return selectedValue.id || null;
+          }
           // Return the 'value' property if it exists, otherwise 'id'
           return selectedValue.value || selectedValue.id || null;
         }
@@ -432,13 +450,26 @@ export class TransformService {
         }
 
         const selectedValue = field.selectedValues[0];
+        const idOnlyFields = [
+          'e4de6f2a-f4b3-4f66-b1be-fcbe8ff607d3', // userVillageId
+          '5cfacade-9d56-4a1e-b4e9-cc8e8c6b04c5', // userVillageId
+          '2f7e6930-0bc2-4e69-8bd4-dde205fa5471', // userVillageId
+          'c3357b23-1394-48a9-afc5-7589873365ae', // userClusterId
+          'd4ad6f2a-f4b3-4f66-b1be-fcbe8ff607f3', // userDistrictId
+          '62340eaa-40fb-48b9-ba90-dcaa78be778e', // userDistrictId
+          '800265b1-9058-482a-94f4-726197e1dfe4', // userStateId
+          'b4ad6f2a-f4b3-4f66-b1be-fcbe8ff607e3', // userStateId
+          '1e3e76e2-7f77-4fd7-a79f-abe5c33d4d08', // userBlockId
+          'e4bc6f2a-f4b3-4f66-b1be-fcbe8ff607f3', // userBlockId
+        ];
 
-        // Return the value property for the type determination
-        if (typeof selectedValue === 'object' && selectedValue !== null) {
-          return selectedValue.value || selectedValue.id || null;
-        } else if (typeof selectedValue === 'string') {
-          return selectedValue;
+        // Return 'id' for specific fields, otherwise 'value' or 'id'
+        if (idOnlyFields.includes(fieldId)) {
+          return selectedValue.id || null;
         }
+        // Return the 'value' property if it exists, otherwise 'id'
+        return selectedValue.value || selectedValue.id || null;
+
 
         return null;
       };
